@@ -12,18 +12,18 @@ class HookEvent():
     def __init__ (self):
         self.handle = None # handle
         self.hm = pyHook.HookManager()
-        enum = CaptureScreen.CaptureScreen()
-        print "Numer of display devices: " +str(enum.enumDisplayDevices())
-        print "Numer of physical monitors: " +str(enum.enumVisibleMonitors())
+        self.enum = CaptureScreen.CaptureScreen()
+        print "Numer of display devices: " +str(self.enum.enumDisplayDevices())
+        print "Numer of physical monitors: " +str(self.enum.enumVisibleMonitors())
             
-    def GetCursorPosition(self):
+    def getCursorPosition(self):
         self.flags, self.handle, (x,y) = win32gui.GetCursorInfo()
         return (x,y)
  
-    def IdentyfyMonitorParams(self):
+    def identyfyMonitorParams(self):
         print win32api.GetMonitorInfo(win32api.MonitorFromPoint(win32api.GetCursorPos()))
         # Monitor': (1920, 0, 3200, 1024)
-        # second monitor wight  =3200 - 1920 = 1280 
+        # second monitor wight  =3200 -first monitor wight 1920 = 1280 
         monitorInfo = win32api.GetMonitorInfo(win32api.MonitorFromPoint(win32api.GetCursorPos()))
         
         self.widthOffset = monitorInfo.get('Monitor')[0]
@@ -33,56 +33,59 @@ class HookEvent():
         
         self.hightOffset = monitorInfo.get('Monitor')[1]
         self.all_hight = monitorInfo.get('Monitor')[3]
-        self.hight = self.all_hight-self.hightOffset
+        self.height = self.all_hight-self.hightOffset
         
-        print "width " +str(self.hight) 
+        print "width " +str(self.height)
+        
+        #this function set member _width, _hight 
         
     def doCaptureScreen(self):
         captureScreen = CaptureScreen.CaptureScreen()
+        captureScreen.setCaptureParams(self.width,self.height,self.widthOffset,self.hightOffset)
         captureScreen.grabAHandle()
         captureScreen.determineSizeMonitors()
         captureScreen.createContext()
         captureScreen.createMemory()
         # it take a monitor resolution after clicking and create proper bitmaps 
-        captureScreen.createBitmap(self.width,self.hight)
-        captureScreen.copyScreenToMemory(self.width,self.hight,self.widthOffset,self.hightOffset)
+        captureScreen.createBitmap()
+        captureScreen.copyScreenToMemory()
         captureScreen.saveBitmapToFile()
         captureScreen.freeObjects()
     
 
     def left_down(self,event):
-        self.IdentyfyMonitorParams()
+        self.identyfyMonitorParams()
         print event.MessageName
-        (x,y) = self.GetCursorPosition()
+        (x,y) = self.getCursorPosition()
         self.doCaptureScreen()
         print x,y
         return True 
     
     def right_down(self,event):
-        self.IdentyfyMonitorParams()
+        self.identyfyMonitorParams()
         print event.MessageName
-        (x,y) = self.GetCursorPosition()
+        (x,y) = self.getCursorPosition()
         self.doCaptureScreen()
         print x,y
         return True    
     
     def middle_down(self,event):
-        self.IdentyfyMonitorParams()
+        self.identyfyMonitorParams()
         print event.MessageName
-        (x,y) = self.GetCursorPosition()
+        (x,y) = self.getCursorPosition()
         self.doCaptureScreen()
         print x,y
         return True
          
     def wheel(self,event):
-        self.IdentyfyMonitorParams()
+        self.identyfyMonitorParams()
         print event.Wheel
-        (x,y) = self.GetCursorPosition()
+        (x,y) = self.getCursorPosition()
         self.doCaptureScreen()
         print x,y
         return True
     
-    def OnKeyboardEvent(self,event):
+    def onKeyboardEvent(self,event):
         #print chr(event.Ascii)WM_KEYUPWM_KEYUPWM_KEYUPWM_KEYUP
         if GetKeyState(HookConstants.VKeyToID('VK_LSHIFT')) and event.KeyID == HookConstants.VKeyToID('VK_SNAPSHOT'):
             print "Shitf+Print screen"
@@ -96,11 +99,15 @@ class HookEvent():
             print "ctrl+A"
         else:
             print "event id " + str(event.KeyID)
+            self.identyfyMonitorParams()
+            print event.MessageName
+            (x,y) = self.getCursorPosition()
+            #self.doCaptureScreen()
         #print HookConstants.IDToName(event.KeyID) # RETURNS FROM kEYID NAME OF KEY.
         return True
     
     # hook mouse
-    def HookMouseAndKey(self):
+    def hookMouseAndKey(self):
         self.hm.SubscribeMouseLeftDown(self.left_down)
         self.hm.SubscribeMouseRightDown(self.right_down)
         self.hm.SubscribeMouseMiddleDown(self.middle_down)
@@ -111,8 +118,8 @@ class HookEvent():
         self.hm.HookMouse()
         
         #hook keyboard
-        self.hm.KeyDown = self.OnKeyboardEvent # watch for all keyboard events
-        #hm.KeyUp = OnKeyboardEvent
+        self.hm.KeyDown = self.onKeyboardEvent # watch for all keyboard events
+        #hm.KeyUp = onKeyboardEvent
         self.hm.HookKeyboard()
         
         while True:
@@ -123,7 +130,7 @@ class HookEvent():
                 pass
 # pythoncom.PumpMessages()
         
-    def UnHookMouseAndKey(self):    
+    def unHookMouseAndKey(self):    
         self.hm.UnhookMouse()
         self.hm.UnHookKeyboard()
         

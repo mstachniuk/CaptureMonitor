@@ -9,5 +9,5 @@ import time
 if __name__ == '__main__':
     
     hook = HookEvent.HookEvent()
-    hook.HookMouseAndKey()
+    hook.hookMouseAndKey()
 
