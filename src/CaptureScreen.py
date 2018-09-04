@@ -1,3 +1,4 @@
+import logging
 import win32gui
 import win32ui
 import win32con
@@ -8,10 +9,13 @@ import re
 import os
 
 
+module_logger = logging.getLogger('application.CaptureScreen')
  
-class CaptureScreen():
+class CaptureScreen(object):
     
     def __init__(self):
+        self.logger = logging.getLogger('application.CaptureScreen')
+        self.logger.info('creating an instance of CaptureScreen')
         self.width = 0
         self.height = 0
         self.srcUpLeftX = 0
@@ -24,11 +28,13 @@ class CaptureScreen():
         return sString
     
     def setCaptureParams(self,width,height,widthOffset,hightOffset):
+        
         self.fileName = self.getCurentTimeDateToString()+".bmp"
         self.width = width
         self.height = height
         self.widthOffset = widthOffset
         self.hightOffset = hightOffset
+        self.logger.info('Setting Capture Params %s %s and offset %s %s ' ,self.width,self.height,self.widthOffset,self.hightOffset )
              
     # this function gets only visible monitors (not  virtual)  
     def enumVisibleMonitors(self):
@@ -36,7 +42,8 @@ class CaptureScreen():
         try:
             i = win32api.GetSystemMetrics(win32con.SM_CMONITORS);
         except:
-            print "error while try get visible Monitors. "
+            #print "error while try get visible Monitors. "
+            self.logger.error('Error while try get visible Monitors' )
         return i
 
     # this function gets displayDeviceName   
@@ -45,6 +52,7 @@ class CaptureScreen():
         while True:
             try:
                 device = win32api.EnumDisplayDevices(None,i);
+                self.logger.DEBUG('Count [%d] Device: %s DeviceName(%s) ' ,i,device.DeviceString,device.DeviceName )
                 #print("[%d] %s (%s)"%(i,device.DeviceString,device.DeviceName));
                 i +=1;
             except:
