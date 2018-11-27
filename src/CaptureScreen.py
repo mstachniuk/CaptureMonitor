@@ -15,7 +15,7 @@ class CaptureScreen(object):
     
     def __init__(self):
         self.logger = logging.getLogger('application.CaptureScreen')
-        self.logger.info('creating an instance of CaptureScreen')
+        self.logger.debug('creating an instance of CaptureScreen')
         self.width = 0
         self.height = 0
         self.srcUpLeftX = 0
@@ -61,22 +61,23 @@ class CaptureScreen(object):
     
     def grabAHandle(self):
         self.hdesktop = win32gui.GetDesktopWindow()
-      
-    def determineSizeMonitors(self):
-        self.width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
-        #SM_CXVIRTUALSCREEN in X
-        #The width of the virtual screen, in pixels. 
-        #The virtual screen is the bounding rectangle of all display monitors.
-        #The SM_XVIRTUALSCREEN metric is the coordinates for the left side of the virtual screen.
-        self.height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
-        #SM_CYVIRTUALSCREEN
-        #The height of the virtual screen, in pixels. 
-        self.left = win32api.GetSystemMetrics(win32con.SM_XVIRTUALSCREEN)
-        #SM_XVIRTUALSCREEN
-        #The coordinates for the left side of the virtual screen.
-        self.top = win32api.GetSystemMetrics(win32con.SM_YVIRTUALSCREEN)
-        #SM_YVIRTUALSCREEN
-        #The coordinates for the top of the virtual screen.
+    
+    # setCaptureParams instead
+#    def determineSizeMonitors(self):
+#         self.width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
+#         #SM_CXVIRTUALSCREEN in X
+#         #The width of the virtual screen, in pixels. 
+#         #The virtual screen is the bounding rectangle of all display monitors.
+#         #The SM_XVIRTUALSCREEN metric is the coordinates for the left side of the virtual screen.
+#         self.height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
+#         #SM_CYVIRTUALSCREEN
+#         #The height of the virtual screen, in pixels. 
+#         self.left = win32api.GetSystemMetrics(win32con.SM_XVIRTUALSCREEN)
+#         #SM_XVIRTUALSCREEN
+#         #The coordinates for the left side of the virtual screen.
+#         self.top = win32api.GetSystemMetrics(win32con.SM_YVIRTUALSCREEN)
+#         #SM_YVIRTUALSCREEN
+#         #The coordinates for the top of the virtual screen.
      
     def createContext(self): 
         #A device context is a structure that defines a set of graphic objects and their associated attributes
@@ -122,8 +123,4 @@ class CaptureScreen(object):
     
     def freeObjects(self):
         self.mem_dc.DeleteDC()
-        win32gui.DeleteObject(self.screenshot.GetHandle())
-        
-        
-
-    
+        #win32gui.DeleteObject(self.screenshot.GetHandle()

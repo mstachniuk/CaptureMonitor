@@ -3,17 +3,17 @@ import HookEvent
 
 if __name__ == '__main__':
     
-    logging.basicConfig(level=logging.INFO)
+    #logging.basicConfig(level=logging.INFO)
     # create logger with 'spam_application'
     
     logger = logging.getLogger('application')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     # create file handler which logs even debug messages
     fhandler = logging.FileHandler('Log.log')
-    fhandler.setLevel(logging.DEBUG)
+    fhandler.setLevel(logging.INFO)
     # create console handler with a higher log level
     shandler = logging.StreamHandler()
-    shandler.setLevel(logging.ERROR)
+    shandler.setLevel(logging.INFO)
     # create formatter and add it to the handlers
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fhandler.setFormatter(formatter)
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     logger.addHandler(fhandler)
     logger.addHandler(shandler)
     
-    logger.info('instance main')
+    #logger.info('instance main')
     hook = HookEvent.HookEvent()
     hook.hookMouseAndKey()
 
