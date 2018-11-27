@@ -8,5 +8,8 @@ Requirements:
 - detect display device and monitor params.
 - make capture from the monitor after push and down 
 
+Update 03.09.2018
+- Using logging in multiple modules
+
 
 
