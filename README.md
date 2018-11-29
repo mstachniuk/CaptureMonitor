@@ -11,5 +11,8 @@ Requirements:
 Update 03.09.2018
 - Using logging in multiple modules
 
+Update 29.11.2018
+- Bug fixing and compressor of PNG
+
 
 
