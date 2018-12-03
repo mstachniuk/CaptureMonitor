@@ -16,6 +16,10 @@ class HookEvent(object):
         self.logger = logging.getLogger('application.HookEvent')
         self.logger.debug('creating an instance of HookEvent')
         self.hm = pyHook.HookManager()
+        self.eventList = []
+        #posX,posY,action,delay
+        self.start_time = time.time()
+        
         self.enum = CaptureScreen.CaptureScreen()
         self.logger.debug('Numer of display devices: %s ' ,str(self.enum.enumDisplayDevices()))
         self.logger.debug('Numer of physical monitors: %s ' ,str(self.enum.enumVisibleMonitors()))
@@ -41,11 +45,19 @@ class HookEvent(object):
         
         self.logger.debug('Monitor detection, height: %s ' ,str(self.height))
         
-        
-    def doCaptureScreen(self,arg):
+    def createEventList(self,arg):
+        elapsed_time = time.time() - self.start_time    
+        self.start_time = time.time()
         self.identyfyMonitorParams()
         (x,y) = self.getCursorPosition()
         self.logger.info('Mouse event: %s position %s %s ' ,arg,x,y)
+        argList = [x,y,arg,elapsed_time]
+        self.eventList.append(argList)
+        for x in self.eventList:
+            print(x)    
+        
+    def doCaptureScreen(self,arg):
+        self.createEventList(arg)
         
         captureScreen = CaptureScreen.CaptureScreen()
         captureScreen.setCaptureParams(self.width,self.height,self.widthOffset,self.hightOffset)
@@ -57,6 +69,8 @@ class HookEvent(object):
         captureScreen.saveBitmapToFile()
         captureScreen.freeObjects()
         time.sleep(0.001)
+        
+        
         return 0
     
 
@@ -73,7 +87,8 @@ class HookEvent(object):
         return True
          
     def wheel(self,event):
-        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
+        #thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
+        thread.start_new_thread(self.createEventList, (event.MessageName,))
         return True
     
     def onKeyboardEvent(self,event):
