@@ -18,7 +18,8 @@ class HookEvent(object):
         self.hm = pyHook.HookManager()
         self.eventList = []
         #posX,posY,action,delay
-        self.start_time = time.time()
+        #self.startTime = time.time()
+        self.recordStatus = False
         
         self.enum = CaptureScreen.CaptureScreen()
         self.logger.debug('Numer of display devices: %s ' ,str(self.enum.enumDisplayDevices()))
@@ -45,78 +46,86 @@ class HookEvent(object):
         
         self.logger.debug('Monitor detection, height: %s ' ,str(self.height))
         
-    def createEventList(self,arg):
-        elapsed_time = time.time() - self.start_time    
-        self.start_time = time.time()
+    def createEventList(self,eventMessageName,keyCode):
+        elapsedTime = time.time() - self.startTime    
+        self.startTime = time.time()
         self.identyfyMonitorParams()
         (x,y) = self.getCursorPosition()
-        self.logger.info('Mouse event: %s position %s %s ' ,arg,x,y)
-        argList = [x,y,arg,elapsed_time]
+        self.logger.info('Mouse event: %s position %s %s ' ,eventMessageName,x,y)
+        argList = [x,y,eventMessageName,(keyCode,),elapsedTime]
         self.eventList.append(argList)
         for x in self.eventList:
             print(x)    
         
-    def doCaptureScreen(self,arg):
-        self.createEventList(arg)
-        
-        captureScreen = CaptureScreen.CaptureScreen()
-        captureScreen.setCaptureParams(self.width,self.height,self.widthOffset,self.hightOffset)
-        captureScreen.grabAHandle()
-        captureScreen.createContext()
-        captureScreen.createMemory()
-        captureScreen.createBitmap()
-        captureScreen.copyScreenToMemory()
-        captureScreen.saveBitmapToFile()
-        captureScreen.freeObjects()
-        time.sleep(0.001)
-        
-        
-        return 0
+    def doCaptureScreen(self,eventMessageName,keyCode):
+        if(self.recordStatus == True):
+            self.createEventList(eventMessageName,keyCode)
+            
+            captureScreen = CaptureScreen.CaptureScreen()
+            captureScreen.setCaptureParams(self.width,self.height,self.widthOffset,self.hightOffset)
+            captureScreen.grabAHandle()
+            captureScreen.createContext()
+            captureScreen.createMemory()
+            captureScreen.createBitmap()
+            captureScreen.copyScreenToMemory()
+            captureScreen.saveBitmapToFile()
+            captureScreen.freeObjects()
+            return True
+        return False
     
 
     def left_down(self,event):
-        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
+        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_LBUTTON')))
         return True 
     
     def right_down(self,event):
-        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
+        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_RBUTTON',)))
         return True    
     
     def middle_down(self,event):
-        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
+        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_MBUTTON',)))
         return True
          
     def wheel(self,event):
         #thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
-        thread.start_new_thread(self.createEventList, (event.MessageName,))
+        thread.start_new_thread(self.createEventList, (event.MessageName,(str(event.Wheel))))
         return True
     
     def onKeyboardEvent(self,event):
         #print chr(event.Ascii)WM_KEYUPWM_KEYUPWM_KEYUPWM_KEYUP
-        if GetKeyState(HookConstants.VKeyToID('VK_LSHIFT')) and event.KeyID == HookConstants.VKeyToID('VK_SNAPSHOT'):
+        if GetKeyState(HookConstants.VKeyToID('VK_MENU')) and event.KeyID == 68 :
+            #print "ALT+D+1"
+            if(self.recordStatus == True):
+                self.recordStatus = False
+                self.logger.info('Capture : STOP Recording ')
+            else:
+                self.recordStatus = True
+                self.logger.info('Capture : START Recording ')
+                self.startTime = time.time()
+        elif GetKeyState(HookConstants.VKeyToID('VK_LSHIFT')) and event.KeyID == HookConstants.VKeyToID('VK_SNAPSHOT'):
             #print "Shitf+Print screen"
             self.logger.info('KeyboardEvent : Shitf+Print screen ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_LSHIFT','VK_SNAPSHOT',)))
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 67:
             #print "ctrl+C"
             self.logger.info('KeyboardEvent : ctrl+C ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','67',)))
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 86:
             #print "ctrl+V"
             self.logger.info('KeyboardEvent : ctrl+V ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','86',)))
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 83:
             #print "ctrl+S"
             self.logger.info('KeyboardEvent : ctrl+S ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','83',)))
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 65:
             #print "ctrl+A"
             self.logger.info('KeyboardEvent : ctrl+A ')
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','65',)))
         else:
             #print "event id " + str(event.KeyID)
             self.logger.info('KeyboardEvent : %s ',event.KeyID)
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
-            time.sleep(0.001)
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,(str(event.KeyID),)))
         return True
 
     # hook mouse
