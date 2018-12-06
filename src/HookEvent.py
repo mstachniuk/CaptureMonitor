@@ -53,7 +53,7 @@ class HookEvent(object):
             self.identyfyMonitorParams()
             (x,y) = self.getCursorPosition()
             self.logger.info('Mouse event: %s position %s %s ' ,eventMessageName,x,y)
-            argList = [x,y,eventMessageName,(keyCode,),elapsedTime]
+            argList = [x,y,eventMessageName,keyCode,elapsedTime]
             self.eventList.append(argList)
             for x in self.eventList:
                 print(x)
@@ -106,27 +106,27 @@ class HookEvent(object):
         elif GetKeyState(HookConstants.VKeyToID('VK_LSHIFT')) and event.KeyID == HookConstants.VKeyToID('VK_SNAPSHOT'):
             #print "Shitf+Print screen"
             self.logger.info('KeyboardEvent : Shitf+Print screen ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_LSHIFT','VK_SNAPSHOT',)))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_LSHIFT','VK_SNAPSHOT')))
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 67:
             #print "ctrl+C"
             self.logger.info('KeyboardEvent : ctrl+C ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','67',)))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','67')))
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 86:
             #print "ctrl+V"
             self.logger.info('KeyboardEvent : ctrl+V ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','86',)))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','86')))
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 83:
             #print "ctrl+S"
             self.logger.info('KeyboardEvent : ctrl+S ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','83',)))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','83')))
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 65:
             #print "ctrl+A"
             self.logger.info('KeyboardEvent : ctrl+A ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','65',)))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','65')))
         else:
             #print "event id " + str(event.KeyID)
             self.logger.info('KeyboardEvent : %s ',event.KeyID)
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,str(event.KeyID)))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,(str(event.KeyID))))
         return True
 
     # hook mouse
