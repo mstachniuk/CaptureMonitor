@@ -47,15 +47,17 @@ class HookEvent(object):
         self.logger.debug('Monitor detection, height: %s ' ,str(self.height))
         
     def createEventList(self,eventMessageName,keyCode):
-        elapsedTime = time.time() - self.startTime    
-        self.startTime = time.time()
-        self.identyfyMonitorParams()
-        (x,y) = self.getCursorPosition()
-        self.logger.info('Mouse event: %s position %s %s ' ,eventMessageName,x,y)
-        argList = [x,y,eventMessageName,(keyCode,),elapsedTime]
-        self.eventList.append(argList)
-        for x in self.eventList:
-            print(x)    
+        if(self.recordStatus == True):
+            elapsedTime = time.time() - self.startTime    
+            self.startTime = time.time()
+            self.identyfyMonitorParams()
+            (x,y) = self.getCursorPosition()
+            self.logger.info('Mouse event: %s position %s %s ' ,eventMessageName,x,y)
+            argList = [x,y,eventMessageName,(keyCode,),elapsedTime]
+            self.eventList.append(argList)
+            for x in self.eventList:
+                print(x)
+        return False    
         
     def doCaptureScreen(self,eventMessageName,keyCode):
         if(self.recordStatus == True):
@@ -70,7 +72,6 @@ class HookEvent(object):
             captureScreen.copyScreenToMemory()
             captureScreen.saveBitmapToFile()
             captureScreen.freeObjects()
-            return True
         return False
     
 
