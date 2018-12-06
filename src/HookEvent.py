@@ -126,7 +126,7 @@ class HookEvent(object):
         else:
             #print "event id " + str(event.KeyID)
             self.logger.info('KeyboardEvent : %s ',event.KeyID)
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,(str(event.KeyID),)))
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,str(event.KeyID)))
         return True
 
     # hook mouse
