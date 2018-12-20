@@ -196,7 +196,12 @@ class HookEvent(object):
         else:
                 self.logger.info('KeyboardEvent : %s %s ',event.MessageName, hex(event.KeyID))
                 if(self.isRecord == True):
-                    thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                    if(event.MessageName == 'key down'):
+                        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                                                                   (hex(event.KeyID),),
+                                                                   ))
+                    else:
+                        thread.start_new_thread(self.createEventList, (event.MessageName,
                                                                    (hex(event.KeyID),),
                                                                    ))
         return True
@@ -227,13 +232,6 @@ class HookEvent(object):
             time.sleep(.05)
             win32api.keybd_event(int(key, 16),0 ,win32con.KEYEVENTF_KEYUP ,0)
 
-#     // Hold Control down and press A
-#     keybd_event(VK_LCONTROL, 0, KEYEVENTF_EXTENDEDKEY, 0);
-#     keybd_event(A, 0, KEYEVENTF_EXTENDEDKEY, 0);
-#     keybd_event(A, 0, KEYEVENTF_KEYUP, 0);
-#     keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, 0);
-
-
     def playEventList(self):
         while self.isPlay:
             for itm in self.eventList:
@@ -252,8 +250,21 @@ class HookEvent(object):
                         win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
                     else:
                         win32api.keybd_event(int(itm[3][0], 16), 0,win32con.KEYEVENTF_KEYUP,0)
-
-
+                if itm[2] == 'mouse left down':
+                        win32api.SetCursorPos((itm[0],itm[1]))
+                        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,itm[0],itm[1],0,0)
+                if itm[2] == 'mouse left up':
+                        win32api.SetCursorPos((itm[0],itm[1]))
+                        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,itm[0],itm[1],0,0)
+                if itm[2] == 'mouse right down':
+                        win32api.SetCursorPos((itm[0],itm[1]))
+                        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN,itm[0],itm[1],0,0)
+                if itm[2] == 'mouse right up':
+                        win32api.SetCursorPos((itm[0],itm[1]))
+                        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,itm[0],itm[1],0,0)
+                if itm[2] == 'mouse wheel':
+                        win32api.SetCursorPos((itm[0],itm[1]))
+                        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, itm[0],itm[1], int(itm[3][0]), 0)
                 if(self.isPlay == False):
                     break
 
