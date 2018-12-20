@@ -3,7 +3,7 @@ import HookEvent
 
 if __name__ == '__main__':
     
-    logging.basicConfig(level=logging.INFO)
+    #logging.basicConfig(level=logging.INFO)
     
     #create logger with 'spam_application'
     logger = logging.getLogger('application')

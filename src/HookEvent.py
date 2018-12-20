@@ -1,6 +1,7 @@
 import logging
 import win32api
 import win32gui
+import win32con
 import pythoncom
 import pyHook
 from pyHook import GetKeyState, HookConstants
@@ -19,7 +20,8 @@ class HookEvent(object):
         self.eventList = []
         #posX,posY,action,delay
         #self.startTime = time.time()
-        self.recordStatus = False
+        self.isRecord = False
+        self.isPlay = False
         
         self.enum = CaptureScreen.CaptureScreen()
         self.logger.debug('Numer of display devices: %s ' ,str(self.enum.enumDisplayDevices()))
@@ -46,86 +48,157 @@ class HookEvent(object):
         
         self.logger.debug('Monitor detection, height: %s ' ,str(self.height))
         
-    def createEventList(self,eventMessageName,keyCode):
-        elapsedTime = time.time() - self.startTime    
-        self.startTime = time.time()
-        self.identyfyMonitorParams()
-        (x,y) = self.getCursorPosition()
-        self.logger.info('Mouse event: %s position %s %s ' ,eventMessageName,x,y)
-        argList = [x,y,eventMessageName,(keyCode,),elapsedTime]
-        self.eventList.append(argList)
-        for x in self.eventList:
-            print(x)    
+    def createEventList(self,eventMessageName,keyTupe):
+        if(self.isRecord == True):
+            elapsedTime = time.time() - self.startTime
+            #elapsedTime = 300    
+            self.startTime = time.time()
+            self.identyfyMonitorParams()
+            (x,y) = self.getCursorPosition()
+            self.logger.info('Mouse event: %s position %s %s ' ,eventMessageName,x,y)
+            argList = [x,y,eventMessageName,keyTupe,elapsedTime]
+            self.eventList.append(argList)
+            for x in self.eventList:
+                print(x)
+        return False    
         
-    def doCaptureScreen(self,eventMessageName,keyCode):
-        if(self.recordStatus == True):
-            self.createEventList(eventMessageName,keyCode)
-            
-            captureScreen = CaptureScreen.CaptureScreen()
-            captureScreen.setCaptureParams(self.width,self.height,self.widthOffset,self.hightOffset)
-            captureScreen.grabAHandle()
-            captureScreen.createContext()
-            captureScreen.createMemory()
-            captureScreen.createBitmap()
-            captureScreen.copyScreenToMemory()
-            captureScreen.saveBitmapToFile()
-            captureScreen.freeObjects()
-            return True
+    def doCaptureScreen(self,eventMessageName,keyTupe):
+        #if(self.isRecord == True):
+        self.createEventList(eventMessageName,keyTupe)
+        
+        captureScreen = CaptureScreen.CaptureScreen()
+        captureScreen.setCaptureParams(self.width,self.height,self.widthOffset,self.hightOffset)
+        captureScreen.grabAHandle()
+        captureScreen.createContext()
+        captureScreen.createMemory()
+        captureScreen.createBitmap()
+        captureScreen.copyScreenToMemory()
+        captureScreen.saveBitmapToFile()
+        captureScreen.freeObjects()
+#            return True
         return False
     
 
     def left_down(self,event):
-        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_LBUTTON')))
+        self.logger.info('Mouse event : %s ',event.MessageName)
+        if(self.isRecord == True):
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                                                           ('0x01',),
+                                                           ))
         return True 
     
     def right_down(self,event):
-        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_RBUTTON',)))
+        self.logger.info('Mouse event : %s ',event.MessageName)
+        if(self.isRecord == True):
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                                                           ('0x02',),
+                                                           ))
         return True    
     
     def middle_down(self,event):
-        thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_MBUTTON',)))
+        self.logger.info('Mouse event : %s ',event.MessageName)
+        if(self.isRecord == True):
+            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                                                           ('0x04',),
+                                                           ))
         return True
          
     def wheel(self,event):
+        self.logger.info('Mouse event : %s ',event.MessageName)
+        if(self.isRecord == True):
         #thread.start_new_thread(self.doCaptureScreen, (event.MessageName,))
-        thread.start_new_thread(self.createEventList, (event.MessageName,(str(event.Wheel))))
+            thread.start_new_thread(self.createEventList, (event.MessageName,
+                                                           (str(event.Wheel),),
+                                                           ))
         return True
     
     def onKeyboardEvent(self,event):
         #print chr(event.Ascii)WM_KEYUPWM_KEYUPWM_KEYUPWM_KEYUP
-        if GetKeyState(HookConstants.VKeyToID('VK_MENU')) and event.KeyID == 68 :
-            #print "ALT+D+1"
-            if(self.recordStatus == True):
-                self.recordStatus = False
-                self.logger.info('Capture : STOP Recording ')
+        if GetKeyState(HookConstants.VKeyToID('VK_MENU')) and event.KeyID == int("0x56", 16) :
+            if(self.isRecord == True):
+                if(event.MessageName == 'key sys down'):
+                    # key sys down when ALT+V pressed. Key down if single key
+                    self.isRecord = False
+                    self.logger.info('Capture : STOP Recording ')
             else:
-                self.recordStatus = True
-                self.logger.info('Capture : START Recording ')
-                self.startTime = time.time()
+                if(self.isPlay == False):
+                    if(event.MessageName == 'key sys down'):
+                        # key sys down when ALT+V pressed. Key down if single key
+                        self.isRecord = True
+                        self.logger.info('Capture : START Recording ')
+                        self.startTime = time.time()
+                else:
+                    self.logger.info('If you want record event, please first stop playback ')
+        
+        elif GetKeyState(HookConstants.VKeyToID('VK_MENU')) and event.KeyID == int("0x42", 16) :
+            if(self.isPlay == True):
+                if(event.MessageName == 'key sys down'):
+                    # key sys down when ALT+V pressed. Key down if single key
+                    self.isPlay = False
+                    self.logger.info('Playback : STOP playback ')
+            else:
+                if(self.isRecord == False):
+                    if(event.MessageName == 'key sys down'):
+                        # key sys down when ALT+V pressed. Key down if single key
+                        self.isPlay = True
+                        self.logger.info('Playback : PLAY playback ')
+                        thread.start_new_thread(self.playEventList, ())
+                else:
+                    self.logger.info('If you want play event, please first stop recording ')
+        
         elif GetKeyState(HookConstants.VKeyToID('VK_LSHIFT')) and event.KeyID == HookConstants.VKeyToID('VK_SNAPSHOT'):
             #print "Shitf+Print screen"
             self.logger.info('KeyboardEvent : Shitf+Print screen ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_LSHIFT','VK_SNAPSHOT',)))
-        elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 67:
+            if(self.isRecord == True):
+                thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                                                               ('0xa0',hex(event.KeyID),),
+                                                               ))
+            
+        elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == int("0x43", 16) :
             #print "ctrl+C"
             self.logger.info('KeyboardEvent : ctrl+C ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','67',)))
-        elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 86:
+            if(self.isRecord == True):
+                thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                                                               ('0xa2',hex(event.KeyID),),
+                                                               ))
+            
+        elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == int("0x56", 16) :
             #print "ctrl+V"
             self.logger.info('KeyboardEvent : ctrl+V ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','86',)))
-        elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 83:
+            if(self.isRecord == True):
+                thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                                                               ('0xa2',hex(event.KeyID),),
+                                                               ))
+            
+        elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == int("0x53", 16) :
             #print "ctrl+S"
             self.logger.info('KeyboardEvent : ctrl+S ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','83',)))
-        elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == 65:
+            if(self.isRecord == True):
+                thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                                                               ('0xa2',hex(event.KeyID),),
+                                                               ))
+            
+        elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')) and event.KeyID == int("0x41", 16) :
             #print "ctrl+A"
             self.logger.info('KeyboardEvent : ctrl+A ')
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,('VK_CONTROL','65',)))
+            if(self.isRecord == True):
+                thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                                                               ('0xa2',hex(event.KeyID),),
+                                                               ))
+            
+        elif (event.KeyID == int("0xa4", 16) or 
+              event.KeyID == int("0x56", 16) or 
+              event.KeyID == int("0x42", 16)
+              #event.KeyID == int("0x4e", 16)
+              ):
+                self.logger.info('DISALLOWED : %s ',hex(event.KeyID))
+        # Keys
         else:
-            #print "event id " + str(event.KeyID)
-            self.logger.info('KeyboardEvent : %s ',event.KeyID)
-            thread.start_new_thread(self.doCaptureScreen, (event.MessageName,(str(event.KeyID),)))
+                self.logger.info('KeyboardEvent : %s %s ',event.MessageName, hex(event.KeyID))
+                if(self.isRecord == True):
+                    thread.start_new_thread(self.doCaptureScreen, (event.MessageName,
+                                                                   (hex(event.KeyID),),
+                                                                   ))
         return True
 
     # hook mouse
@@ -133,21 +206,57 @@ class HookEvent(object):
         self.hm.SubscribeMouseLeftDown(self.left_down)
         self.hm.SubscribeMouseRightDown(self.right_down)
         self.hm.SubscribeMouseMiddleDown(self.middle_down)
-#         self.hm.SubscribeMouseLeftUp(self.left_down)
-#         self.hm.SubscribeMouseRightUp(self.right_down)
-#         self.hm.SubscribeMouseMiddleUp(self.middle_down)
+        self.hm.SubscribeMouseLeftUp(self.left_down)
+        self.hm.SubscribeMouseRightUp(self.right_down)
+        self.hm.SubscribeMouseMiddleUp(self.middle_down)
         self.hm.SubscribeMouseWheel(self.wheel)
         self.hm.HookMouse()
         
         #hook keyboard
         self.hm.KeyDown = self.onKeyboardEvent # watch for all keyboard events
-        #self.hm.KeyUp = onKeyboardEvent
+        self.hm.KeyUp = self.onKeyboardEvent
         self.hm.HookKeyboard()
         
         try:
             pythoncom.PumpMessages()
         except KeyboardInterrupt:
             pass
+        
+    def createKeyEvent(self,key):   
+            win32api.keybd_event(int(key, 16), 0,0,0)
+            time.sleep(.05)
+            win32api.keybd_event(int(key, 16),0 ,win32con.KEYEVENTF_KEYUP ,0)
+            
+#     // Hold Control down and press A
+#     keybd_event(VK_LCONTROL, 0, KEYEVENTF_EXTENDEDKEY, 0);
+#     keybd_event(A, 0, KEYEVENTF_EXTENDEDKEY, 0);
+#     keybd_event(A, 0, KEYEVENTF_KEYUP, 0);
+#     keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, 0);
+    
+            
+    def playEventList(self):
+        while self.isPlay:
+            for itm in self.eventList:
+                print itm[4]
+                time.sleep(itm[4]) #first wait elapsed time then press
+                #self.createKeyEvent(x[3])
+                if itm[2] == 'key down':
+                    if len(itm[3]) > 1:
+                        win32api.keybd_event(int(itm[3][0], 16), 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
+                        win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
+                    else:
+                        win32api.keybd_event(int(itm[3][0], 16), 0,0,0)
+                if itm[2] == 'key up':
+                    if len(itm[3]) > 1:
+                        win32api.keybd_event(int(itm[3][0], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
+                        win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
+                    else:
+                        win32api.keybd_event(int(itm[3][0], 16), 0,win32con.KEYEVENTF_KEYUP,0)
+                        
+                    
+                if(self.isPlay == False):
+                    break
+                
 
     def unHookMouseAndKey(self):    
         self.hm.UnhookMouse()
