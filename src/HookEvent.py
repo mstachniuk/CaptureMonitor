@@ -87,8 +87,6 @@ class HookEvent(object):
             thread.start_new_thread(self.createEventList, (event.MessageName,
                                                            (str(0),),
                                                            ))
-             
-        
         return True
         
     def left_down(self,event):
