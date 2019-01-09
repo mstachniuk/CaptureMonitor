@@ -58,8 +58,10 @@ class HookEvent(object):
             self.logger.info('Mouse event: %s position %s %s ' ,eventMessageName,x,y)
             argList = [x,y,eventMessageName,keyTupe,elapsedTime]
             self.eventList.append(argList)
-            for x in self.eventList:
-                print x
+            self.logger.info('Event %s ', argList )
+#             for x in self.eventList:
+#                 print x
+#                 self.logger.info('If you want record event, please first stop playback ')
                 #self.logger.info('Event: %s ' ,x)
         return False
 
@@ -269,7 +271,8 @@ class HookEvent(object):
     def playEventList(self):
         while self.isPlay:
             for itm in self.eventList:
-                print itm[4]
+                #print itm[4]
+                self.logger.info('Play event delay : %s ',itm[4])
                 time.sleep(itm[4]) #first wait elapsed time then press
                 #self.createKeyEvent(x[3])
                 if itm[2] == 'mouse move':
