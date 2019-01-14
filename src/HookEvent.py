@@ -75,6 +75,7 @@ class HookEvent(object):
         return False
 
     def move(self,event):
+        self.logger.info('Mouse event : %s ',event.MessageName)
         if(self.isRecord == True):
             self.createEventList(event.MessageName,(str(0),))
 
@@ -160,7 +161,7 @@ class HookEvent(object):
             if(self.isRecord == True):
                 self.createEventList(event.MessageName,('0xa0',hex(event.KeyID),))
                 
-        # "CTL+KEY"
+        # "CTRL+KEY"
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')):
             if(self.isRecord == True):
                 self.createEventList(event.MessageName,('0xa2',hex(event.KeyID),))

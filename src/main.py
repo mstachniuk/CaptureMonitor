@@ -1,5 +1,7 @@
 import logging
 import HookEvent
+import datetime
+import re
 
 if __name__ == '__main__':
     
@@ -9,8 +11,10 @@ if __name__ == '__main__':
     logger = logging.getLogger('application')
     logger.setLevel(logging.DEBUG)
     
+    LogName = str(datetime.datetime.now())
+    logName = re.sub(":","",LogName)+'.log'
     # create file handler which logs even debug messages
-    fhandler = logging.FileHandler('Log.log')
+    fhandler = logging.FileHandler(logName)
     fhandler.setLevel(logging.INFO)
     
     # create console handler with a higher log level
