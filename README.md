@@ -14,5 +14,12 @@ Update 03.09.2018
 Update 29.11.2018
 - Bug fixing and compressor of PNG
 
+Update 14.01.2019
+- Full support of mouse event  (move, click, keyboard)
+- recording mouse events
+- playback mouse events
+- bug fixing
+
+
 
 
