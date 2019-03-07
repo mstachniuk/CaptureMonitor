@@ -13,16 +13,16 @@ import string
 module_logger = logging.getLogger('application.HookEvent')
 
 Event_type = {
-    "mouse move" : 0x01,
-    "key down" : 0x02,
-    "key up" : 0x03,
-    "key sys down" : 0x04,
-    "key sys up" : 0x05,
-    "mouse left down" : 0x06,
-    "mouse left up" : 0x07,
-    "mouse right down" : 0x08,
-    "mouse right up" : 0x09,
-    "mouse wheel" : 0x10,
+    "mouse move" : 1,
+    "key down" : 2,
+    "key up" : 3,
+    "key sys down" : 4,
+    "key sys up" : 5,
+    "mouse left down" : 6,
+    "mouse left up" : 7,
+    "mouse right down" : 8,
+    "mouse right up" : 9,
+    "mouse wheel" : 10,
     }
 
 class HookEvent(object):
@@ -101,7 +101,7 @@ class HookEvent(object):
         if(self.isRecord == True):
             self.createEventList(Event_type[event.MessageName],
                                  None,
-                                 '0x01')
+                                 1)
             thread.start_new_thread(self.doCaptureScreen, ())
 
         return True
@@ -111,7 +111,7 @@ class HookEvent(object):
         if(self.isRecord == True):
             self.createEventList(Event_type[event.MessageName],
                                  None,
-                                 '0x02')
+                                 2)
             thread.start_new_thread(self.doCaptureScreen, ())
 
         return True
@@ -121,7 +121,7 @@ class HookEvent(object):
         if(self.isRecord == True):
             self.createEventList(Event_type[event.MessageName],
                                  None,
-                                 '0x04')
+                                 4)
             thread.start_new_thread(self.doCaptureScreen, ())
             
         return True
@@ -131,7 +131,7 @@ class HookEvent(object):
         if(self.isRecord == True):
             self.createEventList(Event_type[event.MessageName],
                                  None,
-                                 str(event.Wheel))
+                                 event.Wheel)
 
         return True
 
@@ -184,8 +184,8 @@ class HookEvent(object):
             if(self.isRecord == True):
                 print event.MessageName
                 self.createEventList(Event_type[event.MessageName],
-                                     '0xa0',
-                                     hex(event.KeyID))
+                                     160,
+                                     event.KeyID)
                 
         # "CTRL+key"
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')):
@@ -195,13 +195,13 @@ class HookEvent(object):
                 if event.Key in string.ascii_uppercase:
                     # if ctrl pressed and The uppercase letters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
                     self.createEventList(Event_type[event.MessageName],
-                                     '0xa2',
-                                     hex(event.KeyID))
+                                     162,
+                                     event.KeyID)
                     thread.start_new_thread(self.doCaptureScreen, ())
                 else:
                     self.createEventList(Event_type[event.MessageName],
                                      None,
-                                     hex(event.KeyID))
+                                     event.KeyID)
                     thread.start_new_thread(self.doCaptureScreen, ())
                     
 
@@ -212,12 +212,12 @@ class HookEvent(object):
                     if(event.MessageName == 'key down'):
                         self.createEventList(Event_type[event.MessageName],
                                              None,
-                                             hex(event.KeyID))
+                                             event.KeyID)
                         thread.start_new_thread(self.doCaptureScreen, ())
                     else:
                         self.createEventList(Event_type[event.MessageName],
                                              None,
-                                             hex(event.KeyID))
+                                             event.KeyID)
         return True
     
     def OnMouseEvent(self,event):
@@ -275,21 +275,20 @@ class HookEvent(object):
                     
                 if (itm[2] == Event_type['key down']) or (itm[2] == Event_type['key sys down']) :
                     if itm[3] == None:
-                        executor.doExtendedKeyDown(int(itm[4], 16))
+                        executor.doExtendedKeyDown(itm[4])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
 #                         win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
                     else:
-                        executor.doExtendedKeyDown(int(itm[3], 16))
-                        executor.doExtendedKeyDown(int(itm[4], 16))
+                        executor.doExtendedKeyDown(itm[3])
+                        executor.doExtendedKeyDown(itm[4])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0,0,0)
                 if (itm[2] == Event_type['key up']) or (itm[2] == Event_type['key sys up']) :
                     if itm[3] == None:
-                        executor.doExtendedKeyUp(int(itm[4], 16))
+                        executor.doExtendedKeyUp(itm[4])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
 #                         win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
                     else:
-                        executor.doExtendedKeyUp(int(itm[3], 16))
-                        executor.doExtendedKeyUp(int(itm[4], 16))
+                        executor.doExtendedKeyUp(itm[3])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0,win32con.KEYEVENTF_KEYUP,0)
                 if itm[2] == Event_type['mouse left down']:
                     executor.doLeftMouseDonw(itm[0], itm[1])
