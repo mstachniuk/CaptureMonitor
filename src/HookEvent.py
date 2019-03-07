@@ -71,7 +71,7 @@ class HookEvent(object):
             
             argList = [x,y,eventMessageName,key1,key2,elapsedTime]
             self.eventList.append(argList)
-            self.logger.info('Event %s ', argList )
+            self.logger.info('Event %s %s %s ',eventMessageName, hex(key1) ,hex(key2) )
             
         return False
 
@@ -89,48 +89,48 @@ class HookEvent(object):
         return False
 
     def move(self,event):
-        self.logger.info('Mouse event : %s ',event.MessageName)
+        self.logger.debug('Mouse event : %s ',event.MessageName)
         if(self.isRecord == True):
             self.createEventList(Event_type[event.MessageName],
-                                 None,
-                                 None)
+                                 0,
+                                 0)
         return True
         
     def left_down(self,event):
-        self.logger.info('Mouse event : %s ',event.MessageName)
+        self.logger.debug('Mouse event : %s ',event.MessageName)
         if(self.isRecord == True):
             self.createEventList(Event_type[event.MessageName],
-                                 None,
+                                 0,
                                  1)
             thread.start_new_thread(self.doCaptureScreen, ())
 
         return True
 
     def right_down(self,event):
-        self.logger.info('Mouse event : %s ',event.MessageName)
+        self.logger.debug('Mouse event : %s ',event.MessageName)
         if(self.isRecord == True):
             self.createEventList(Event_type[event.MessageName],
-                                 None,
+                                 0,
                                  2)
             thread.start_new_thread(self.doCaptureScreen, ())
 
         return True
 
     def middle_down(self,event):
-        self.logger.info('Mouse event : %s ',event.MessageName)
+        self.logger.debug('Mouse event : %s ',event.MessageName)
         if(self.isRecord == True):
             self.createEventList(Event_type[event.MessageName],
-                                 None,
+                                 0,
                                  4)
             thread.start_new_thread(self.doCaptureScreen, ())
             
         return True
 
     def wheel(self,event):
-        self.logger.info('Mouse event : %s ',event.MessageName)
+        self.logger.debug('Mouse event : %s ',event.MessageName)
         if(self.isRecord == True):
             self.createEventList(Event_type[event.MessageName],
-                                 None,
+                                 0,
                                  event.Wheel)
 
         return True
@@ -200,7 +200,7 @@ class HookEvent(object):
                     thread.start_new_thread(self.doCaptureScreen, ())
                 else:
                     self.createEventList(Event_type[event.MessageName],
-                                     None,
+                                     0,
                                      event.KeyID)
                     thread.start_new_thread(self.doCaptureScreen, ())
                     
@@ -211,12 +211,12 @@ class HookEvent(object):
                 if(self.isRecord == True):
                     if(event.MessageName == 'key down'):
                         self.createEventList(Event_type[event.MessageName],
-                                             None,
+                                             0,
                                              event.KeyID)
                         thread.start_new_thread(self.doCaptureScreen, ())
                     else:
                         self.createEventList(Event_type[event.MessageName],
-                                             None,
+                                             0,
                                              event.KeyID)
         return True
     
@@ -234,14 +234,14 @@ class HookEvent(object):
     
         # hook mouse
     def hookMouseAndKey(self):
-        self.hm.SubscribeMouseMove(self.move)
-        self.hm.SubscribeMouseLeftDown(self.left_down)
-        self.hm.SubscribeMouseRightDown(self.right_down)
-        self.hm.SubscribeMouseMiddleDown(self.middle_down)
-        self.hm.SubscribeMouseLeftUp(self.left_down)
-        self.hm.SubscribeMouseRightUp(self.right_down)
-        self.hm.SubscribeMouseMiddleUp(self.middle_down)
-        self.hm.SubscribeMouseWheel(self.wheel)
+#         self.hm.SubscribeMouseMove(self.move)
+#         self.hm.SubscribeMouseLeftDown(self.left_down)
+#         self.hm.SubscribeMouseRightDown(self.right_down)
+#         self.hm.SubscribeMouseMiddleDown(self.middle_down)
+#         self.hm.SubscribeMouseLeftUp(self.left_down)
+#         self.hm.SubscribeMouseRightUp(self.right_down)
+#         self.hm.SubscribeMouseMiddleUp(self.middle_down)
+#         self.hm.SubscribeMouseWheel(self.wheel)
 #         self.hm.MouseAll = self.OnMouseEvent
         self.hm.HookMouse()
 
@@ -266,7 +266,7 @@ class HookEvent(object):
         
         while self.isPlay:
             for itm in self.eventList:
-                self.logger.info('Play event delay : %s ',itm[4])
+                #self.logger.info('Play event delay : %s ',itm[4])
                 time.sleep(itm[5]) #first wait elapsed time then press
                 if itm[2] == Event_type['mouse move']:
                     #Pass the coordinates (x,y) as a tuple:
@@ -274,7 +274,7 @@ class HookEvent(object):
                     executor.doMouseMove(itm[0],itm[1])
                     
                 if (itm[2] == Event_type['key down']) or (itm[2] == Event_type['key sys down']) :
-                    if itm[3] == None:
+                    if itm[3] == 0:
                         executor.doExtendedKeyDown(itm[4])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
 #                         win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
@@ -283,7 +283,7 @@ class HookEvent(object):
                         executor.doExtendedKeyDown(itm[4])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0,0,0)
                 if (itm[2] == Event_type['key up']) or (itm[2] == Event_type['key sys up']) :
-                    if itm[3] == None:
+                    if itm[3] == 0:
                         executor.doExtendedKeyUp(itm[4])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
 #                         win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
