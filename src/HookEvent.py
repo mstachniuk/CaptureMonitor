@@ -1,7 +1,6 @@
 import logging
 import win32api
 import win32gui
-import win32con
 import pythoncom
 import pyHook
 from pyHook import GetKeyState, HookConstants
