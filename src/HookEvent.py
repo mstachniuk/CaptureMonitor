@@ -21,7 +21,7 @@ Event_type = {
     "mouse left down" : 0x06,
     "mouse left up" : 0x07,
     "mouse right down" : 0x08,
-    "mouse right up" : 0x08,
+    "mouse right up" : 0x09,
     "mouse wheel" : 0x10,
     }
 
@@ -234,14 +234,14 @@ class HookEvent(object):
     
         # hook mouse
     def hookMouseAndKey(self):
-#         self.hm.SubscribeMouseMove(self.move)
-#         self.hm.SubscribeMouseLeftDown(self.left_down)
-#         self.hm.SubscribeMouseRightDown(self.right_down)
-#         self.hm.SubscribeMouseMiddleDown(self.middle_down)
-#         self.hm.SubscribeMouseLeftUp(self.left_down)
-#         self.hm.SubscribeMouseRightUp(self.right_down)
-#         self.hm.SubscribeMouseMiddleUp(self.middle_down)
-#         self.hm.SubscribeMouseWheel(self.wheel)
+        self.hm.SubscribeMouseMove(self.move)
+        self.hm.SubscribeMouseLeftDown(self.left_down)
+        self.hm.SubscribeMouseRightDown(self.right_down)
+        self.hm.SubscribeMouseMiddleDown(self.middle_down)
+        self.hm.SubscribeMouseLeftUp(self.left_down)
+        self.hm.SubscribeMouseRightUp(self.right_down)
+        self.hm.SubscribeMouseMiddleUp(self.middle_down)
+        self.hm.SubscribeMouseWheel(self.wheel)
 #         self.hm.MouseAll = self.OnMouseEvent
         self.hm.HookMouse()
 
