@@ -15,12 +15,21 @@ class EventExecutor(object):
         #Pass the coordinates as a tuple:
         win32api.SetCursorPos((x_pos,y_pos))
         
+    def doKeyDown(self,key):
+        win32api.keybd_event(key, 0, 0, 0);
+        self.logger.info('doKeyDown : %s ',hex(key))
+        
     def doExtendedKeyDown(self,key):
         win32api.keybd_event(key, 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
         self.logger.info('doExtendedKeyDown : %s ',hex(key))
     
-    def doExtendedKeyUp(self,key):
+    def doKeyUp(self,key):
         win32api.keybd_event(key, 0, win32con.KEYEVENTF_KEYUP, 0);
+        self.logger.info('doKeyUp : %s ',hex(key))
+        
+    def doExtendedKeyUp(self,key):
+        win32api.keybd_event(key, 0, win32con.KEYEVENTF_EXTENDEDKEY | win32con.KEYEVENTF_KEYUP, 0);
+        
         self.logger.info('doExtendedKeyUp : %s ',hex(key))
     
     def doLeftMouseDonw(self, x_pos, y_pos):

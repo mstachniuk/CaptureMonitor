@@ -141,6 +141,11 @@ class HookEvent(object):
             if(self.isRecord == True):
                 if(event.MessageName == 'key sys down'):
                     # key sys down when ALT+V pressed. Key down if single key
+                    # add the last up ALT , before stop recording
+                    self.createEventList(Event_type["key sys up"],
+                                         0,
+                                         164)
+                                    
                     self.isRecord = False
                     self.logger.info('Capture : STOP Recording ')
             else:
@@ -275,7 +280,7 @@ class HookEvent(object):
                     
                 if (itm[2] == Event_type['key down']) or (itm[2] == Event_type['key sys down']) :
                     if itm[3] == 0:
-                        executor.doExtendedKeyDown(itm[4])
+                        executor.doKeyDown(itm[4])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
 #                         win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
                     else:
@@ -284,11 +289,12 @@ class HookEvent(object):
 #                         win32api.keybd_event(int(itm[3][0], 16), 0,0,0)
                 if (itm[2] == Event_type['key up']) or (itm[2] == Event_type['key sys up']) :
                     if itm[3] == 0:
-                        executor.doExtendedKeyUp(itm[4])
+                        executor.doKeyUp(itm[4])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
 #                         win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
                     else:
                         executor.doExtendedKeyUp(itm[3])
+                        executor.doExtendedKeyUp(itm[4])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0,win32con.KEYEVENTF_KEYUP,0)
                 if itm[2] == Event_type['mouse left down']:
                     executor.doLeftMouseDonw(itm[0], itm[1])
