@@ -194,7 +194,7 @@ class HookEvent(object):
                 
         # "CTRL+key"
         elif GetKeyState(HookConstants.VKeyToID('VK_CONTROL')):
-
+            # if button ctr is DOWN only !!
             #self.logger.info('KeyboardEvent CTRL: %s %s ',event.MessageName, hex(event.KeyID))
             if(self.isRecord == True):
                 if event.Key in string.ascii_uppercase:
@@ -286,6 +286,11 @@ class HookEvent(object):
                     else:
                         executor.doExtendedKeyDown(itm[3])
                         executor.doExtendedKeyDown(itm[4])
+                        # ctr+C is registered as extended if ctr and c pressed or ctr and c released
+                        # not registered if c  and ctr (c is first released before ctr)
+                        # it's better to do  redundant auto extended Up
+                        executor.doExtendedKeyUp(itm[3])
+                        executor.doExtendedKeyUp(itm[4])
 #                         win32api.keybd_event(int(itm[3][0], 16), 0,0,0)
                 if (itm[2] == Event_type['key up']) or (itm[2] == Event_type['key sys up']) :
                     if itm[3] == 0:
