@@ -3,6 +3,7 @@ import HookEvent
 import datetime
 import re
 
+
 if __name__ == '__main__':
     
     #logging.basicConfig(level=logging.INFO)
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     logger.addHandler(fhandler)
     logger.addHandler(shandler)
     
-    #logger.info('instance main')
+    logger.info('instance main')
     
     hook = HookEvent.HookEvent()
-    hook.hookMouseAndKey()
+    hook.hookMouseAndKey()   

@@ -6,9 +6,13 @@ import pyHook
 from pyHook import GetKeyState, HookConstants
 import CaptureScreen
 import EventExecutor
-import thread
+import threading
 import time
 import string
+import TCPServer
+import pickle
+
+import Queue
 
 module_logger = logging.getLogger('application.HookEvent')
 
@@ -34,10 +38,24 @@ class HookEvent(object):
         self.eventList = []
         self.isRecord = False
         self.isPlay = False
+        self.isConnected = False
 
         self.enum = CaptureScreen.CaptureScreen()
         self.logger.debug('Numer of display devices: %s ' ,str(self.enum.enumDisplayDevices()))
         self.logger.debug('Numer of physical monitors: %s ' ,str(self.enum.enumVisibleMonitors()))
+        
+        self.eventThread = threading.Event()
+        timeOut_event= 2
+        self.queue = Queue.Queue()
+        timeOut_empty = 0.25
+        tcpThread = threading.Thread(name='blocking', 
+                                     target=self.sendTCPComand,
+                                    args=(self.eventThread,timeOut_event,self.queue,timeOut_empty))
+        tcpThread.start()
+        
+#         self.server = TCPServer.TCPServer()
+#         self.server.Connect()
+#         self.isTCP = Truez
 
     def getCursorPosition(self):
         self.flags, self.handle, (x,y) = win32gui.GetCursorInfo()
@@ -61,6 +79,7 @@ class HookEvent(object):
 
     def createEventList(self,eventMessageName,key1,key2):
         if(self.isRecord == True):
+
             elapsedTime = time.time() - self.startTime
             
             self.startTime = time.time()
@@ -71,10 +90,45 @@ class HookEvent(object):
             
             argList = [x,y,eventMessageName,key1,key2,elapsedTime]
             self.eventList.append(argList)
-            self.logger.info('Event %s %s %s ',eventMessageName, hex(key1) ,hex(key2) )
             
-        return False
+            self.logger.info('Event %s %s %s ',eventMessageName, hex(key1) ,hex(key2) )
 
+        return True
+    
+    def sendTCPComand(self,eventThread,timeOut_event,queue,timeOut_empty):
+
+            while True:
+                if(self.isConnected == False):
+                    self.server = TCPServer.TCPServer()
+                    self.isConnected = self.server.Connect()
+                    
+                eventThread.wait(timeOut_event)
+                if(eventThread.is_set()):
+                    self.logger.info('event sendTCPComand: %s', eventThread.is_set())
+                    
+                    while True:
+                        try:
+                            value = queue.get(timeout=timeOut_empty)
+                            # If timeout, it blocks at most timeout seconds and raises the Empty exception
+                            # if no item was available within that time.
+                        except Queue.Empty:                               
+                            eventThread.clear()
+                            queue.task_done()
+                            break
+                        else:
+                            if(self.isConnected):
+                                data = pickle.dumps(value)
+                                self.logger.info('Send TCP'  )
+                                self.isConnected = self.server.Send(data)
+                                self.logger.info('Value: %s', value)
+                            else:
+                                break
+                                
+                else:
+                    self.logger.info('event sendTCPComand: False')
+                
+
+                    
     def doCaptureScreen(self):
         captureScreen = CaptureScreen.CaptureScreen()
         captureScreen.setCaptureParams(self.width,self.height,self.widthOffset,self.hightOffset)
@@ -102,7 +156,8 @@ class HookEvent(object):
             self.createEventList(Event_type[event.MessageName],
                                  0,
                                  1)
-            thread.start_new_thread(self.doCaptureScreen, ())
+            t = threading.Thread(target=self.doCaptureScreen)
+            t.start()
 
         return True
 
@@ -112,7 +167,8 @@ class HookEvent(object):
             self.createEventList(Event_type[event.MessageName],
                                  0,
                                  2)
-            thread.start_new_thread(self.doCaptureScreen, ())
+            t = threading.Thread(target=self.doCaptureScreen)
+            t.start()
 
         return True
 
@@ -122,7 +178,8 @@ class HookEvent(object):
             self.createEventList(Event_type[event.MessageName],
                                  0,
                                  4)
-            thread.start_new_thread(self.doCaptureScreen, ())
+            t = threading.Thread(target=self.doCaptureScreen)
+            t.start()
             
         return True
 
@@ -136,7 +193,14 @@ class HookEvent(object):
         return True
 
     def onKeyboardEvent(self,event):
-        # "ALT+V record event "
+#         if GetKeyState(HookConstants.VKeyToID('VK_MENU')) and event.KeyID == int("0x4D", 16) :
+#             if(event.MessageName == 'key sys down'):
+#                 tcpThread = threading.Thread(name='blocking', 
+#                                              target=self.sendTCPComand,
+#                                              args=(self.eventThread,timeOut,self.queue))
+#                 tcpThread.start()
+            
+        # "ALT+V record event "    
         if GetKeyState(HookConstants.VKeyToID('VK_MENU')) and event.KeyID == int("0x56", 16) :
             if(self.isRecord == True):
                 if(event.MessageName == 'key sys down'):
@@ -171,7 +235,8 @@ class HookEvent(object):
                         # key sys down when ALT+V pressed. Key down if single key
                         self.isPlay = True
                         self.logger.info('Playback : PLAY playback ')
-                        thread.start_new_thread(self.playEventList, ())
+                        t = threading.Thread(target=self.playEventList)
+                        t.start()
                 else:
                     self.logger.info('If you want play event, please first stop recording ')
                     
@@ -202,12 +267,14 @@ class HookEvent(object):
                     self.createEventList(Event_type[event.MessageName],
                                      162,
                                      event.KeyID)
-                    thread.start_new_thread(self.doCaptureScreen, ())
+                    t = threading.Thread(target=self.doCaptureScreen)
+                    t.start()
                 else:
                     self.createEventList(Event_type[event.MessageName],
                                      0,
                                      event.KeyID)
-                    thread.start_new_thread(self.doCaptureScreen, ())
+                    t = threading.Thread(target=self.doCaptureScreen)
+                    t.start()
                     
 
         # Keys
@@ -218,7 +285,8 @@ class HookEvent(object):
                         self.createEventList(Event_type[event.MessageName],
                                              0,
                                              event.KeyID)
-                        thread.start_new_thread(self.doCaptureScreen, ())
+                        t = threading.Thread(target=self.doCaptureScreen)
+                        t.start()
                     else:
                         self.createEventList(Event_type[event.MessageName],
                                              0,
@@ -239,14 +307,14 @@ class HookEvent(object):
     
         # hook mouse
     def hookMouseAndKey(self):
-#         self.hm.SubscribeMouseMove(self.move)
-#         self.hm.SubscribeMouseLeftDown(self.left_down)
-#         self.hm.SubscribeMouseRightDown(self.right_down)
-#         self.hm.SubscribeMouseMiddleDown(self.middle_down)
-#         self.hm.SubscribeMouseLeftUp(self.left_down)
-#         self.hm.SubscribeMouseRightUp(self.right_down)
-#         self.hm.SubscribeMouseMiddleUp(self.middle_down)
-#         self.hm.SubscribeMouseWheel(self.wheel)
+        self.hm.SubscribeMouseMove(self.move)
+        self.hm.SubscribeMouseLeftDown(self.left_down)
+        self.hm.SubscribeMouseRightDown(self.right_down)
+        self.hm.SubscribeMouseMiddleDown(self.middle_down)
+        self.hm.SubscribeMouseLeftUp(self.left_down)
+        self.hm.SubscribeMouseRightUp(self.right_down)
+        self.hm.SubscribeMouseMiddleUp(self.middle_down)
+        self.hm.SubscribeMouseWheel(self.wheel)
 #         self.hm.MouseAll = self.OnMouseEvent
         self.hm.HookMouse()
 
@@ -260,67 +328,51 @@ class HookEvent(object):
         except KeyboardInterrupt:
             pass
 
-#     def createKeyEvent(self,key):
-#             win32api.keybd_event(int(key, 16), 0,0,0)
-#             time.sleep(.05)
-#             win32api.keybd_event(int(key, 16),0 ,win32con.KEYEVENTF_KEYUP ,0)
-
     def playEventList(self):
-        #[xpoz, ypoz, type, key1, key2 , delay
         executor = EventExecutor.EventExecutor()
         
         while self.isPlay:
-            for itm in self.eventList:
-                #self.logger.info('Play event delay : %s ',itm[4])
-                time.sleep(itm[5]) #first wait elapsed time then press
-                if itm[2] == Event_type['mouse move']:
+            for value in self.eventList:
+                #self.logger.info('Play event delay : %s ',value[4])
+                time.sleep(value[5]) #first wait elapsed time then press
+                
+                if(self.isConnected):
+                    self.queue.put(value)
+                    self.eventThread.set()
+                    self.logger.info('event createEventList: %s', self.eventThread.is_set())
+            
+            
+                if value[2] == Event_type['mouse move']:
                     #Pass the coordinates (x,y) as a tuple:
-                    #win32api.SetCursorPos((itm[0],itm[1]))
-                    executor.doMouseMove(itm[0],itm[1])
+                    executor.doMouseMove(value[0],value[1])
                     
-                if (itm[2] == Event_type['key down']) or (itm[2] == Event_type['key sys down']) :
-                    if itm[3] == 0:
-                        executor.doKeyDown(itm[4])
-#                         win32api.keybd_event(int(itm[3][0], 16), 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
-#                         win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_EXTENDEDKEY, 0);
+                if (value[2] == Event_type['key down']) or (value[2] == Event_type['key sys down']) :
+                    if value[3] == 0:
+                        executor.doKeyDown(value[4])
                     else:
-                        executor.doExtendedKeyDown(itm[3])
-                        executor.doExtendedKeyDown(itm[4])
+                        executor.doExtendedKeyDown(value[3])
+                        executor.doExtendedKeyDown(value[4])
                         # ctr+C is registered as extended if ctr and c pressed or ctr and c released
                         # not registered if c  and ctr (c is first released before ctr)
                         # it's better to do  redundant auto extended Up
-                        executor.doExtendedKeyUp(itm[3])
-                        executor.doExtendedKeyUp(itm[4])
-#                         win32api.keybd_event(int(itm[3][0], 16), 0,0,0)
-                if (itm[2] == Event_type['key up']) or (itm[2] == Event_type['key sys up']) :
-                    if itm[3] == 0:
-                        executor.doKeyUp(itm[4])
-#                         win32api.keybd_event(int(itm[3][0], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
-#                         win32api.keybd_event(int(itm[3][1], 16), 0, win32con.KEYEVENTF_KEYUP, 0);
+                        executor.doExtendedKeyUp(value[3])
+                        executor.doExtendedKeyUp(value[4])
+                if (value[2] == Event_type['key up']) or (value[2] == Event_type['key sys up']) :
+                    if value[3] == 0:
+                        executor.doKeyUp(value[4])
                     else:
-                        executor.doExtendedKeyUp(itm[3])
-                        executor.doExtendedKeyUp(itm[4])
-#                         win32api.keybd_event(int(itm[3][0], 16), 0,win32con.KEYEVENTF_KEYUP,0)
-                if itm[2] == Event_type['mouse left down']:
-                    executor.doLeftMouseDonw(itm[0], itm[1])
-#                         win32api.SetCursorPos((itm[0],itm[1]))
-#                         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,itm[0],itm[1],0,0)
-                if itm[2] == Event_type['mouse left up']:
-                    executor.doLeftMouseUp(itm[0], itm[1])
-#                         win32api.SetCursorPos((itm[0],itm[1]))
-#                         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,itm[0],itm[1],0,0)
-                if itm[2] == Event_type['mouse right down']:
-                    executor.doRightMouseDonw(itm[0], itm[1])
-#                         win32api.SetCursorPos((itm[0],itm[1]))
-#                         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN,itm[0],itm[1],0,0)
-                if itm[2] == Event_type['mouse right up']:
-                    executor.doRightMouseUp(itm[0], itm[1])
-#                         win32api.SetCursorPos((itm[0],itm[1]))
-#                         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,itm[0],itm[1],0,0)
-                if itm[2] == Event_type['mouse wheel']:
-                    executor.doMouseWheel(itm[0], itm[1], itm[4])
-#                         win32api.SetCursorPos((itm[0],itm[1]))
-#                         win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, itm[0],itm[1], win32con.WHEEL_DELTA *int(itm[3][0]), 0)
+                        executor.doExtendedKeyUp(value[3])
+                        executor.doExtendedKeyUp(value[4])
+                if value[2] == Event_type['mouse left down']:
+                    executor.doLeftMouseDonw(value[0], value[1])
+                if value[2] == Event_type['mouse left up']:
+                    executor.doLeftMouseUp(value[0], value[1])
+                if value[2] == Event_type['mouse right down']:
+                    executor.doRightMouseDonw(value[0], value[1])
+                if value[2] == Event_type['mouse right up']:
+                    executor.doRightMouseUp(value[0], value[1])
+                if value[2] == Event_type['mouse wheel']:
+                    executor.doMouseWheel(value[0], value[1], value[4])
                 if(self.isPlay == False):
                     break
 
