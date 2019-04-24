@@ -45,7 +45,7 @@ class TCPServer(object):
         while True:
             data = self.connection.recv(BUFFER_SIZE)
             if data == "ack":
-                print "ack"
+                self.logger.info('ack')
                 break
                 
     
