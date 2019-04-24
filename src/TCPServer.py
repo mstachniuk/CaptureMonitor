@@ -40,7 +40,15 @@ class TCPServer(object):
             if err.errno :
                 self.logger.info('Error Send(): %s' ,err )
                 return False
-              
+            
+    def WaitForReceived(self):
+        while True:
+            data = self.connection.recv(BUFFER_SIZE)
+            if data == "ack":
+                print "ack"
+                break
+                
+    
     def Close(self):
         self.connection.close()
 

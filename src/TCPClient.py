@@ -62,6 +62,7 @@ class TCPClient(object):
                     self.queue.put(dataUnpacked)
                     self.eventThread.set()
                     print dataUnpacked
+                    self.sock.sendall("ack")
             except socket.error as err:
                 if err.errno :
                     self.logger.info('%s' ,err )

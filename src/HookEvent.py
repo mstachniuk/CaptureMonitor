@@ -121,6 +121,9 @@ class HookEvent(object):
                                 self.logger.info('Send TCP'  )
                                 self.isConnected = self.server.Send(data)
                                 self.logger.info('Value: %s', value)
+                                
+                                self.server.WaitForReceived()
+                                
                             else:
                                 break
                                 
