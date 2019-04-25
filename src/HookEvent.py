@@ -118,11 +118,16 @@ class HookEvent(object):
                         else:
                             if(self.isConnected):
                                 data = pickle.dumps(value)
-                                self.logger.info('Send TCP'  )
+                                self.logger.info('Send TCP')
                                 self.isConnected = self.server.Send(data)
                                 self.logger.info('Value: %s', value)
                                 
-                                self.server.WaitForReceived()
+                                isACK = self.server.WaitForReceived()
+                                if (isACK == False):
+                                    self.logger.info('Timeout ACK')
+                                if (isACK == True):
+                                    self.logger.info('Next data')
+                                    
                                 
                             else:
                                 break
