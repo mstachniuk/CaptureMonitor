@@ -52,7 +52,13 @@ class TCPServer(object):
         t = threading.Timer(time_value, self.SetTimeout, [timeout_event])
         t.start()
         while True:
-            data = self.connection.recv(BUFFER_SIZE)
+            try:
+                data = self.connection.recv(BUFFER_SIZE)
+            except socket.error as err:
+                if err.errno :
+                    self.logger.info('Error received data(): %s' ,err )
+                    return False
+                    break
             if data == ackFormat:
                 self.logger.info('ack recived from client %s ',ackFormat)
                 return True
@@ -64,6 +70,3 @@ class TCPServer(object):
     
     def Close(self):
         self.connection.close()
-
-        
-        
