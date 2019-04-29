@@ -34,8 +34,6 @@ class TCPClient(object):
         shandler.setFormatter(formatter)
         self.logger.addHandler(shandler)
         self.logger.debug('creating an instance of TCPClient')
-        self.EventList = []
-        self.myit = iter(self.EventList)
         # Create a TCP/IP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         

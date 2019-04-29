@@ -1,0 +1,12 @@
+
+.project
+*.pyc
+.pydevproject
+*.png
+*.log
+*.svn-base
+*.db
+src/.svn/format
+*.db-journal
+src/.svn/entries
+*.py
