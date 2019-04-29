@@ -122,7 +122,8 @@ class HookEvent(object):
                                 self.isConnected = self.server.Send(data)
                                 self.logger.info('Value: %s', value)
                                 
-                                isACK = self.server.WaitForReceived()
+                                ackFormat = format(value[5], '.5f')
+                                isACK = self.server.WaitForReceived(ackFormat)
                                 if (isACK == False):
                                     self.logger.info('Timeout ACK')
                                 if (isACK == True):
@@ -131,7 +132,7 @@ class HookEvent(object):
                                 
                             else:
                                 break
-                                
+
                 else:
                     self.logger.info('event sendTCPComand: False')
                 

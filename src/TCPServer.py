@@ -46,15 +46,15 @@ class TCPServer(object):
         self.timeout_event = timeout_event
         self.timeout_event.set()
       
-    def WaitForReceived(self):
+    def WaitForReceived(self,ackFormat):
         timeout_event = threading.Event()
         time_value =  3
         t = threading.Timer(time_value, self.SetTimeout, [timeout_event])
         t.start()
         while True:
             data = self.connection.recv(BUFFER_SIZE)
-            if data == "ack":
-                self.logger.info('ack recived from client ')
+            if data == ackFormat:
+                self.logger.info('ack recived from client %s ',ackFormat)
                 return True
                 break
             if timeout_event.is_set():

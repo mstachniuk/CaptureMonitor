@@ -6,8 +6,6 @@ import threading
 import Queue
 import EventExecutor
 
-module_logger = logging.getLogger('application.TCPClient')
-
 Event_type = {
     "mouse move" : 1,
     "key down" : 2,
@@ -28,7 +26,13 @@ BUFFER_SIZE = 1024
 class TCPClient(object):
     
     def __init__(self):
-        self.logger = logging.getLogger('application.TCPClient')
+        self.logger = logging.getLogger('TCPClient')
+        self.logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        shandler = logging.StreamHandler()
+        shandler.setLevel(logging.DEBUG)
+        shandler.setFormatter(formatter)
+        self.logger.addHandler(shandler)
         self.logger.debug('creating an instance of TCPClient')
         self.EventList = []
         self.myit = iter(self.EventList)
@@ -51,7 +55,13 @@ class TCPClient(object):
         server_address = (TCP_IP, TCP_PORT)
         #self.logger.info('connecting to %s port %s' ,server_address ) 
         #print >>sys.stderr, 'connecting to %s port %s' % server_address
-        self.sock.connect(server_address)
+        try:
+            self.sock.connect(server_address)
+        except socket.error as err:
+            if err.errno :
+                self.logger.info('%s' ,err )
+            
+            
 
     def ReciveCommand(self):
         while True:
@@ -61,8 +71,11 @@ class TCPClient(object):
                     dataUnpacked = pickle.loads(data)
                     self.queue.put(dataUnpacked)
                     self.eventThread.set()
-                    print dataUnpacked
-                    self.sock.sendall("ack")
+                    self.logger.info('%s' ,dataUnpacked )
+                    ackFormat = format(dataUnpacked[5], '.5f')
+                    # ack is a delay time with limited number of significant digits
+                    self.logger.info('ack send : %s' ,ackFormat )
+                    self.sock.sendall(ackFormat)
             except socket.error as err:
                 if err.errno :
                     self.logger.info('%s' ,err )
