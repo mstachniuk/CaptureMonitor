@@ -2,12 +2,10 @@ import logging
 import socket
 from _socket import SOL_SOCKET, SO_REUSEADDR
 import threading
+import ConfigParser
 
 module_logger = logging.getLogger('application.TCPServer')
 
-TCP_IP = 'localhost'
-TCP_PORT = 5005
-BUFFER_SIZE = 1024
 
 class TCPServer(object):
     
@@ -15,7 +13,14 @@ class TCPServer(object):
         self.logger = logging.getLogger('application.TCPServer')
         self.logger.debug('creating an instance of TCPServer')
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address = (TCP_IP, TCP_PORT)
+        
+        config = ConfigParser.RawConfigParser()
+        config.read('config.ini')
+        self.TCP_IP = config.get('server', 'TCP_IP')
+        self.TCP_PORT = config.getint('server', 'TCP_PORT')
+        self.BUFFER_SIZE = config.getint('server', 'BUFFER_SIZE')
+        
+        server_address = (self.TCP_IP, self.TCP_PORT)
         #Then bind() is used to associate the socket with the server address
         self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         #this allows the ad/port to be reused immediately instead of it being stuck in the TIME_WAIT 
@@ -53,7 +58,7 @@ class TCPServer(object):
         t.start()
         while True:
             try:
-                data = self.connection.recv(BUFFER_SIZE)
+                data = self.connection.recv(self.BUFFER_SIZE)
             except socket.error as err:
                 if err.errno :
                     self.logger.info('Error received data(): %s' ,err )

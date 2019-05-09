@@ -5,6 +5,7 @@ import pickle
 import threading
 import Queue
 import EventExecutor
+import ConfigParser
 
 Event_type = {
     "mouse move" : 1,
@@ -19,10 +20,6 @@ Event_type = {
     "mouse wheel" : 10,
     }
 
-TCP_IP = 'localhost'
-TCP_PORT = 5005
-BUFFER_SIZE = 1024
-
 class TCPClient(object):
     
     def __init__(self):
@@ -34,6 +31,14 @@ class TCPClient(object):
         shandler.setFormatter(formatter)
         self.logger.addHandler(shandler)
         self.logger.debug('creating an instance of TCPClient')
+        
+        config = ConfigParser.RawConfigParser()
+        config.read('config.ini')
+        
+        self.TCP_IP = config.get('client', 'TCP_IP')
+        self.TCP_PORT = config.getint('client', 'TCP_PORT')
+        self.BUFFER_SIZE = config.getint('client', 'BUFFER_SIZE')
+
         # Create a TCP/IP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
@@ -50,7 +55,7 @@ class TCPClient(object):
     
     def ConnectToServer(self):
         # Connect the socket to the port where the server is listening
-        server_address = (TCP_IP, TCP_PORT)
+        server_address = (self.TCP_IP, self.TCP_PORT)
         #self.logger.info('connecting to %s port %s' ,server_address ) 
         #print >>sys.stderr, 'connecting to %s port %s' % server_address
         try:
@@ -64,7 +69,7 @@ class TCPClient(object):
     def ReciveCommand(self):
         while True:
             try:
-                data = self.sock.recv(BUFFER_SIZE)
+                data = self.sock.recv(self.BUFFER_SIZE)
                 if data:
                     dataUnpacked = pickle.loads(data)
                     self.queue.put(dataUnpacked)
