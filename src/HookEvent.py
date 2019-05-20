@@ -53,9 +53,6 @@ class HookEvent(object):
                                     args=(self.eventThread,timeOut_event,self.queue,timeOut_empty))
         tcpThread.start()
         
-#         self.server = TCPServer.TCPServer()
-#         self.server.Connect()
-#         self.isTCP = Truez
 
     def getCursorPosition(self):
         self.flags, self.handle, (x,y) = win32gui.GetCursorInfo()
