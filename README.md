@@ -23,6 +23,9 @@ Update 14.01.2019
 - bug fixing
 
 Update 29.04.2019
-- tcp/ip communication. The server is a recorder and the client is a receiver.
+- tcp/ip communication. The server is a recorder and the client is a receiver
+
+Update 20.05.2019
+- ack in TCP and config file
 
 
