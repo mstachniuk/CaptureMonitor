@@ -3,6 +3,7 @@ import HookEvent
 import datetime
 import re
 
+
 if __name__ == '__main__':
     
     #logging.basicConfig(level=logging.INFO)
@@ -19,7 +20,7 @@ if __name__ == '__main__':
     
     # create console handler with a higher log level
     shandler = logging.StreamHandler()
-    shandler.setLevel(logging.DEBUG)
+    shandler.setLevel(logging.INFO)
     
     # create formatter and add it to the handlers
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     logger.addHandler(fhandler)
     logger.addHandler(shandler)
     
-    #logger.info('instance main')
+    logger.info('instance main')
     
     hook = HookEvent.HookEvent()
-    hook.hookMouseAndKey()
+    hook.hookMouseAndKey()   

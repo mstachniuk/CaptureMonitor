@@ -33,7 +33,7 @@ class CaptureScreen(object):
         self.height = height
         self.widthOffset = widthOffset
         self.hightOffset = hightOffset
-        self.logger.info('Setting Capture Params %s %s and offset %s %s ' ,self.width,self.height,self.widthOffset,self.hightOffset )
+        self.logger.debug('Setting Capture Params %s %s and offset %s %s ' ,self.width,self.height,self.widthOffset,self.hightOffset )
              
     # this function gets only visible monitors (not  virtual)  
     def enumVisibleMonitors(self):
