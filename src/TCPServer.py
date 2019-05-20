@@ -58,17 +58,22 @@ class TCPServer(object):
         t.start()
         while True:
             try:
+                self.logger.info('Waiting for ACK: %s' ,ackFormat )
                 data = self.connection.recv(self.BUFFER_SIZE)
+                ackReceived = data.decode('UTF-8')
+                self.logger.info('Decode ACK: %s' ,ackReceived )
+                
             except socket.error as err:
                 if err.errno :
                     self.logger.info('Error received data(): %s' ,err )
                     return False
                     break
-            if data == ackFormat:
+            if ackReceived == ackFormat:
                 self.logger.info('ack recived from client %s ',ackFormat)
                 return True
                 break
             if timeout_event.is_set():
+                self.logger.info('Timeout WaitForReceived')
                 return False
                 break
                 
