@@ -101,7 +101,7 @@ class HookEvent(object):
                     
                 eventThread.wait(timeOut_event)
                 if(eventThread.is_set()):
-                    self.logger.info('event sendTCPComand: %s', eventThread.is_set())
+                    self.logger.info('New data on the list - ready to be sent: %s', eventThread.is_set())
                     
                     while True:
                         try:
@@ -131,7 +131,7 @@ class HookEvent(object):
                                 break
 
                 else:
-                    self.logger.info('event sendTCPComand: False')
+                    self.logger.info('Waiting for event to send %s:' , eventThread.is_set())
                 
 
                     
@@ -340,12 +340,13 @@ class HookEvent(object):
         while self.isPlay:
             for value in self.eventList:
                 #self.logger.info('Play event delay : %s ',value[4])
+                self.logger.info('Wait delay time to execute next command: %s', value[5])
                 time.sleep(value[5]) #first wait elapsed time then press
                 
                 if(self.isConnected):
                     self.queue.put(value)
                     self.eventThread.set()
-                    self.logger.info('event createEventList: %s', self.eventThread.is_set())
+                    self.logger.info('Set event to send: %s', self.eventThread.is_set())
             
             
                 if value[2] == Event_type['mouse move']:

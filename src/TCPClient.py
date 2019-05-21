@@ -140,7 +140,7 @@ class TCPClient(object):
                                 executor.doMouseWheel(value[0], value[1], value[4])
 
                 else:
-                    self.logger.info('event received: False')
+                    self.logger.info('No data received: False')
 
 tcptest = TCPClient()
 tcptest.ConnectToServer()
