@@ -46,9 +46,10 @@ class TCPClient(object):
         timeOut_event= 2
         self.queue = Queue.Queue()
         timeOut_empty = 0.25
+        self.stop_reading = False
         tcpThread = threading.Thread(name='blocking', 
                                      target=self.executeTCPComand,
-                                    args=(self.eventThread,timeOut_event,self.queue,timeOut_empty))
+                                    args=(self.eventThread,timeOut_event,self.queue,timeOut_empty,self.stop_reading))
         tcpThread.start()
         
         
@@ -82,10 +83,11 @@ class TCPClient(object):
             except socket.error as err:
                 if err.errno :
                     self.logger.info('%s' ,err )
+                    self.stop_reading = True
+                    self.sock.close()
                     break
-        self.sock.close()
     
-    def executeTCPComand(self,eventThread,timeOut_event,queue,timeOut_empty):
+    def executeTCPComand(self,eventThread,timeOut_event,queue,timeOut_empty,stop_reading):
         executor = EventExecutor.EventExecutor()
         while True:
                 eventThread.wait(timeOut_event)
@@ -141,6 +143,9 @@ class TCPClient(object):
 
                 else:
                     self.logger.info('No data received: False')
+                    if(self.stop_reading == True):
+                        self.logger.info('Reading data interrupted')
+                        break
 
 tcptest = TCPClient()
 tcptest.ConnectToServer()
