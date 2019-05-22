@@ -10,3 +10,4 @@ src/.svn/format
 *.db-journal
 src/.svn/entries
 *.py
+*.spec

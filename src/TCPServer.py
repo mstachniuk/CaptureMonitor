@@ -55,18 +55,19 @@ class TCPServer(object):
         self.timeout_event.set()
       
     def WaitForReceived(self,ackFormat):
+        self.timeout_event = threading.Event()
+        time_value =  3
+        t = threading.Timer(time_value, self.SetTimeout, [])
+        self.logger.info('Start timeout : %s seconds' ,time_value )
+        t.start()
         while True:
             try:
                 self.logger.info('Waiting for ACK: %s' ,ackFormat )
                 data = self.connection.recv(self.BUFFER_SIZE)
-                # global timeout connection is 3 seconds. After that timeout is running for 3 seconds.
+                # global timeout connection is 3 seconds.
                 ackReceived = data.decode('UTF-8')
                 self.logger.info('Received and decoding ACK: %s' ,ackReceived )
-                self.timeout_event = threading.Event()
-                time_value =  3
-                t = threading.Timer(time_value, self.SetTimeout, [])
-                self.logger.info('Start timeout : %s seconds' ,time_value )
-                t.start()
+
                 
             except socket.error as err:
                 if err.errno :
@@ -77,7 +78,6 @@ class TCPServer(object):
                 self.logger.info('Ack is correct  %s ',ackFormat)
                 return True
                 break
-            # after a timeout of  3 second the function returns False and leaves while loop
             if self.timeout_event.is_set():
                 self.logger.info('No ack received %s' ,time_value )
                 return False
