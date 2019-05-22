@@ -35,9 +35,9 @@ class TCPClient(object):
         config = ConfigParser.RawConfigParser()
         config.read('config.ini')
         
-        self.TCP_IP = config.get('client', 'TCP_IP')
-        self.TCP_PORT = config.getint('client', 'TCP_PORT')
-        self.BUFFER_SIZE = config.getint('client', 'BUFFER_SIZE')
+        self.TCP_IP = config.get('server', 'TCP_IP')
+        self.TCP_PORT = config.getint('server', 'TCP_PORT')
+        self.BUFFER_SIZE = config.getint('server', 'BUFFER_SIZE')
 
         # Create a TCP/IP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
