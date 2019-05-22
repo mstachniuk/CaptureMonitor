@@ -64,6 +64,7 @@ class TCPClient(object):
         except socket.error as err:
             if err.errno :
                 self.logger.info('%s' ,err )
+                self.stop_reading = True
             
             
 
