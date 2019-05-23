@@ -382,7 +382,8 @@ class HookEvent(object):
                     executor.doMouseWheel(value[0], value[1], value[4])
                 if(self.isPlay == False):
                     break
-
+            self.logger.info('Playback : STOPED - Event list is finished ')
+            self.isPlay = False
         
     def unHookMouseAndKey(self):
         self.hm.UnhookMouse()
