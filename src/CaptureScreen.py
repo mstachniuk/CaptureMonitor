@@ -58,7 +58,7 @@ class CaptureScreen(object):
         while True:
             try:
                 device = win32api.EnumDisplayDevices(None,i);
-                self.logger.debug('Count [%d] Device: %s DeviceName(%s) ' ,i,device.DeviceString,device.DeviceName )
+                self.logger.DEBUG('Count [%d] Device: %s DeviceName(%s) ' ,i,device.DeviceString,device.DeviceName )
                 i +=1;
             except:
                 break;
@@ -108,22 +108,22 @@ class CaptureScreen(object):
         self.rgbaImage = self.image.convert('RGBA')
         
         #create new Image  RGBA
-#         self.ellipseImage = Image.new('RGBA', self.image.size, (255,255,255,0))
+        self.ellipseImage = Image.new('RGBA', self.image.size, (255,255,255,0))
         
         #draw ellipse there  
-        d = ImageDraw.Draw(self.rgbaImage)
+        d = ImageDraw.Draw(self.ellipseImage)
         d.ellipse((self.xDraw-self.radius, self.yDraw-self.radius, self.xDraw+self.radius, self.yDraw+self.radius), fill=(255,0,0,128))
         
         
         #blend alpha screenshot with cursor point
-#         self.out = Image.alpha_composite(self.rgbaImage, self.ellipseImage)
+        self.out = Image.alpha_composite(self.rgbaImage, self.ellipseImage)
 
         return True
     
     def saveBitmapToFile(self,):
         self.path = os.getcwd()
         #self.screenshot.SaveBitmapFile(self.mem_dc, "D:\\Capture\\"+ str(self.fileName))
-        self.rgbaImage.save(str(self.fileName),'PNG')
+        self.out.save(str(self.fileName),'PNG')
    
     
     def freeObjects(self):
@@ -131,5 +131,5 @@ class CaptureScreen(object):
         win32gui.DeleteObject(self.screenshot.GetHandle())
         self.image.close()
         self.rgbaImage.close()
-#         self.ellipseImage.close()
+        self.ellipseImage.close()
         
