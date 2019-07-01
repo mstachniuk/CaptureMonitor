@@ -108,22 +108,22 @@ class CaptureScreen(object):
         self.rgbaImage = self.image.convert('RGBA')
         
         #create new Image  RGBA
-        self.ellipseImage = Image.new('RGBA', self.image.size, (255,255,255,0))
+#         self.ellipseImage = Image.new('RGBA', self.image.size, (255,255,255,0))
         
         #draw ellipse there  
-        d = ImageDraw.Draw(self.ellipseImage)
+        d = ImageDraw.Draw(self.rgbaImage)
         d.ellipse((self.xDraw-self.radius, self.yDraw-self.radius, self.xDraw+self.radius, self.yDraw+self.radius), fill=(255,0,0,128))
         
         
         #blend alpha screenshot with cursor point
-        self.out = Image.alpha_composite(self.rgbaImage, self.ellipseImage)
+#         self.out = Image.alpha_composite(self.rgbaImage, self.ellipseImage)
 
         return True
     
     def saveBitmapToFile(self,):
         self.path = os.getcwd()
         #self.screenshot.SaveBitmapFile(self.mem_dc, "D:\\Capture\\"+ str(self.fileName))
-        self.out.save(str(self.fileName),'PNG')
+        self.rgbaImage.save(str(self.fileName),'PNG')
    
     
     def freeObjects(self):
@@ -131,5 +131,5 @@ class CaptureScreen(object):
         win32gui.DeleteObject(self.screenshot.GetHandle())
         self.image.close()
         self.rgbaImage.close()
-        self.ellipseImage.close()
+#         self.ellipseImage.close()
         
