@@ -29,3 +29,5 @@ Update 20.05.2019
 - ack in TCP and config file
 
 
+Update 01.07.2019
+- draw alpha cursor position
