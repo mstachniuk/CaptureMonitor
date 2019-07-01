@@ -58,7 +58,7 @@ class CaptureScreen(object):
         while True:
             try:
                 device = win32api.EnumDisplayDevices(None,i);
-                self.logger.DEBUG('Count [%d] Device: %s DeviceName(%s) ' ,i,device.DeviceString,device.DeviceName )
+                self.logger.debug('Count [%d] Device: %s DeviceName(%s) ' ,i,device.DeviceString,device.DeviceName )
                 i +=1;
             except:
                 break;

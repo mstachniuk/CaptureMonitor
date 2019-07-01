@@ -10,7 +10,7 @@ if __name__ == '__main__':
     
     #create logger with 'spam_application'
     logger = logging.getLogger('application')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     
     LogName = str(datetime.datetime.now())
     logName = re.sub(":","",LogName)+'.log'

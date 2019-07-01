@@ -101,7 +101,7 @@ class HookEvent(object):
                     
                 eventThread.wait(timeOut_event)
                 if(eventThread.is_set()):
-                    self.logger.info('New data on the list - ready to be sent: %s', eventThread.is_set())
+                    self.logger.debug('New data on the list - ready to be sent: %s', eventThread.is_set())
                     
                     while True:
                         try:
@@ -115,23 +115,23 @@ class HookEvent(object):
                         else:
                             if(self.isConnected):
                                 data = pickle.dumps(value)
-                                self.logger.info('Send TCP')
+                                self.logger.debug('Send TCP')
                                 self.isConnected = self.server.Send(data)
-                                self.logger.info('Value: %s', value)
+                                self.logger.debug('Value: %s', value)
                                 
                                 ackFormat = format(value[5], '.5f')
                                 isACK = self.server.WaitForReceived(ackFormat)
                                 if (isACK == False):
-                                    self.logger.info('Timeout ACK')
+                                    self.logger.error('Timeout ACK')
                                 if (isACK == True):
-                                    self.logger.info('Next data')
+                                    self.logger.debug('Next data')
                                     
                                 
                             else:
                                 break
 
                 else:
-                    self.logger.info('Waiting for event to send %s:' , eventThread.is_set())
+                    self.logger.debug('Waiting for event to send %s:' , eventThread.is_set())
                 
 
                     
@@ -342,13 +342,13 @@ class HookEvent(object):
         while self.isPlay:
             for value in self.eventList:
                 #self.logger.info('Play event delay : %s ',value[4])
-                self.logger.info('Wait delay time to execute next command: %s', value[5])
+                self.logger.debug('Wait delay time to execute next command: %s', value[5])
                 time.sleep(value[5]) #first wait elapsed time then press
                 
                 if(self.isConnected):
                     self.queue.put(value)
                     self.eventThread.set()
-                    self.logger.info('Set event to send: %s', self.eventThread.is_set())
+                    self.logger.debug('Set event to send: %s', self.eventThread.is_set())
             
             
                 if value[2] == Event_type['mouse move']:
@@ -384,7 +384,8 @@ class HookEvent(object):
                     executor.doMouseWheel(value[0], value[1], value[4])
                 if(self.isPlay == False):
                     break
-
+            self.logger.info('Playback : STOPED - Event list is finished ')
+            self.isPlay = False
         
     def unHookMouseAndKey(self):
         self.hm.UnhookMouse()

@@ -24,10 +24,10 @@ class TCPClient(object):
     
     def __init__(self):
         self.logger = logging.getLogger('TCPClient')
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         shandler = logging.StreamHandler()
-        shandler.setLevel(logging.DEBUG)
+        shandler.setLevel(logging.INFO)
         shandler.setFormatter(formatter)
         self.logger.addHandler(shandler)
         self.logger.debug('creating an instance of TCPClient')
@@ -57,13 +57,13 @@ class TCPClient(object):
     def ConnectToServer(self):
         # Connect the socket to the port where the server is listening
         server_address = (self.TCP_IP, self.TCP_PORT)
-        #self.logger.info('connecting to %s port %s' ,server_address ) 
-        #print >>sys.stderr, 'connecting to %s port %s' % server_address
+        self.logger.info('connecting to %s',server_address ) 
+
         try:
             self.sock.connect(server_address)
         except socket.error as err:
             if err.errno :
-                self.logger.info('%s' ,err )
+                self.logger.error('%s' ,err )
                 self.stop_reading = True
             
             
@@ -79,11 +79,11 @@ class TCPClient(object):
                     self.logger.info('%s' ,dataUnpacked )
                     ackFormat = format(dataUnpacked[5], '.5f')
                     # ack is a delay time with limited number of significant digits
-                    self.logger.info('ack send : %s' ,ackFormat )
+                    self.logger.debug('ack send : %s' ,ackFormat )
                     self.sock.sendall(ackFormat)
             except socket.error as err:
                 if err.errno :
-                    self.logger.info('%s' ,err )
+                    self.logger.error('%s' ,err )
                     self.stop_reading = True
                     self.sock.close()
                     break
@@ -145,7 +145,7 @@ class TCPClient(object):
                 else:
                     self.logger.info('No data received: False')
                     if(self.stop_reading == True):
-                        self.logger.info('Reading data interrupted')
+                        self.logger.debug('Reading data interrupted')
                         break
 
 tcptest = TCPClient()
