@@ -138,6 +138,8 @@ class HookEvent(object):
     def doCaptureScreen(self):
         captureScreen = CaptureScreen.CaptureScreen()
         captureScreen.setCaptureParams(self.width,self.height,self.widthOffset,self.hightOffset)
+        (x,y) = self.getCursorPosition()
+        captureScreen.setCursorDraw(x,y)
         captureScreen.grabAHandle()
         captureScreen.createContext()
         captureScreen.createMemory()

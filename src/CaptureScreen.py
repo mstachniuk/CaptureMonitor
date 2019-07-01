@@ -6,7 +6,7 @@ import win32api
 import datetime
 import re
 import os
-from PIL import Image
+from PIL import Image,ImageDraw
 
 module_logger = logging.getLogger('application.CaptureScreen')
  
@@ -20,6 +20,8 @@ class CaptureScreen(object):
         self.srcUpLeftX = 0
         self.srcUpLeftY = 0
         self.fileName = ""
+        #radius of the circle for the mouse position
+        self.radius =  10
 
     def getCurentTimeDateToString(self):
         sString = str(datetime.datetime.now())
@@ -35,6 +37,12 @@ class CaptureScreen(object):
         self.hightOffset = hightOffset
         self.logger.debug('Setting Capture Params %s %s and offset %s %s ' ,self.width,self.height,self.widthOffset,self.hightOffset )
              
+    def setCursorDraw(self,xPoz,yPoz):
+        # x position on the screenShoot ex:(x=80) = global mouse cursor pos(2000) - offset from the previous monitor(1920) from the left side.
+        self.xDraw = xPoz - self.widthOffset
+        self.yDraw = yPoz - self.hightOffset
+        
+    
     # this function gets only visible monitors (not  virtual)  
     def enumVisibleMonitors(self):
         i = 0
@@ -96,15 +104,32 @@ class CaptureScreen(object):
                                     'RGB',
                                     (self.bmpinfo['bmWidth'], self.bmpinfo['bmHeight']),
                                     self.bmpInt, 'raw', 'BGRX', 0, 1)
+        # convert BGRX to RGBA
+        self.rgbaImage = self.image.convert('RGBA')
+        
+        #create new Image  RGBA
+        self.ellipseImage = Image.new('RGBA', self.image.size, (255,255,255,0))
+        
+        #draw ellipse there  
+        d = ImageDraw.Draw(self.ellipseImage)
+        d.ellipse((self.xDraw-self.radius, self.yDraw-self.radius, self.xDraw+self.radius, self.yDraw+self.radius), fill=(255,0,0,128))
+        
+        
+        #blend alpha screenshot with cursor point
+        self.out = Image.alpha_composite(self.rgbaImage, self.ellipseImage)
+
         return True
     
     def saveBitmapToFile(self,):
         self.path = os.getcwd()
         #self.screenshot.SaveBitmapFile(self.mem_dc, "D:\\Capture\\"+ str(self.fileName))
-        self.image.save(str(self.fileName),'PNG')
+        self.out.save(str(self.fileName),'PNG')
    
     
     def freeObjects(self):
         self.mem_dc.DeleteDC()
         win32gui.DeleteObject(self.screenshot.GetHandle())
         self.image.close()
+        self.rgbaImage.close()
+        self.ellipseImage.close()
+        
