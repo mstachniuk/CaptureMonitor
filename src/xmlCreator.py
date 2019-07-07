@@ -33,9 +33,4 @@ class XmlCreator(object):
         self.tree.write(filename)
 
 
-test = XmlCreator()
-test.create_root("root")
-test.create_child("command")
-test.create_element("param", "pos_x", "200")
-test.compose_tree()
-test.save_xml()
+
