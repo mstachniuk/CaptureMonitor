@@ -31,3 +31,7 @@ Update 20.05.2019
 
 Update 01.07.2019
 - draw alpha cursor position
+
+Updaye 08.07.2019
+- save project in xml
+- find and merge xml files into one command list.
