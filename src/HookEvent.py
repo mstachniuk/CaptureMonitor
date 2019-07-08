@@ -83,7 +83,7 @@ class HookEvent(object):
         tcp_thread.start()
         self.server = None
 
-        self.xml = XmlCreator.XmlCreator()
+        self.xml_data = XmlCreator
 
     def identify_monitor_params(self):
         monitor_info = win32api.GetMonitorInfo(win32api.MonitorFromPoint(win32api.GetCursorPos()))
@@ -281,7 +281,7 @@ class HookEvent(object):
             if not self.is_record and not self.is_play:
                 if event.MessageName == 'key sys down':
                     path = str(os.getcwd())
-                    self.event_list = self.xml.merge_files(path, "command", "param")
+                    self.event_list = self.xml_data.merge_files(path, "command", "param")
                     self.logger.info('Loading merged command list to even')
                     for element in self.event_list:
                         print element
