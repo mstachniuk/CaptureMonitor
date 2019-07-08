@@ -282,9 +282,9 @@ class HookEvent(object):
                 if event.MessageName == 'key sys down':
                     path = str(os.getcwd())
                     self.event_list = self.xml_data.merge_files(path, "command", "param")
-                    self.logger.info('Loading merged command list to even')
-                    for element in self.event_list:
-                        print element
+                    self.logger.info('Merge xml files into the command list')
+                    # for element in self.event_list:
+                    #     print element
         # "ALT+N clear recording list"
         elif GetKeyState(HookConstants.VKeyToID('VK_MENU')) and event.KeyID == int("0x4e", 16):
             if not self.is_record and not self.is_play:
