@@ -13,6 +13,7 @@ import TCPServer
 import XmlCreator
 import pickle
 import Queue
+import os
 
 module_logger = logging.getLogger('application.HookEvent')
 
@@ -81,6 +82,8 @@ class HookEvent(object):
                                       args=(self.event_thread, time_out_event, self.queue, time_out_empty))
         tcp_thread.start()
         self.server = None
+
+        self.xml = XmlCreator.XmlCreator()
 
     def identify_monitor_params(self):
         monitor_info = win32api.GetMonitorInfo(win32api.MonitorFromPoint(win32api.GetCursorPos()))
@@ -273,11 +276,21 @@ class HookEvent(object):
                     self.logger.info('Saving List')
             else:
                 self.logger.info('If you want save list, please first stop playback and capture ')
+        # ALT+L Load merged xml files
+        elif GetKeyState(HookConstants.VKeyToID('VK_MENU')) and event.KeyID == int("0x4C", 16):
+            if not self.is_record and not self.is_play:
+                if event.MessageName == 'key sys down':
+                    path = str(os.getcwd())
+                    self.event_list = self.xml.merge_files(path, "command", "param")
+                    self.logger.info('Loading merged command list to even')
+                    for element in self.event_list:
+                        print element
         # "ALT+N clear recording list"
         elif GetKeyState(HookConstants.VKeyToID('VK_MENU')) and event.KeyID == int("0x4e", 16):
             if not self.is_record and not self.is_play:
-                del self.event_list[:]
-                self.logger.info('Event List : clear ')
+                if event.MessageName == 'key sys down':
+                    del self.event_list[:]
+                    self.logger.info('Event List : clear ')
             else:
                 self.logger.info('If you want clear list, please first stop playback and capture ')
 
@@ -393,7 +406,7 @@ class HookEvent(object):
                     executor.do_mouse_wheel(value[0], value[1], value[4])
                 if not self.is_play:
                     break
-            self.logger.info('Playback : STOPED - Event list is finished ')
+            self.logger.info('Playback : STOPPED - Event list is finished ')
             self.is_play = False
 
     def save_event_list(self):
