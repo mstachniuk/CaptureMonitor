@@ -11,3 +11,5 @@ src/.svn/format
 src/.svn/entries
 *.py
 *.spec
+
+.idea
