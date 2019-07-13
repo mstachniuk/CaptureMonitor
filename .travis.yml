@@ -1,7 +1,8 @@
-language: shell
+language: sh
+python: "2.7"
 os: windows
 before_install:
-  - choco install python27
+  - choco install python2
   - python -m pip install --upgrade pip
 env: PATH=/c/Python27:/c/Python27/Scripts:$PATH
 
